@@ -3,9 +3,8 @@ main = "src/worker.js"
 compatibility_date = "2026-04-06"
 compatibility_flags = ["nodejs_compat"]
 
-# Custom domain — required for Cache API to work in production
-# Uncomment and set once you've added the route in Cloudflare dashboard
-# routes = [{ pattern = "stats.lukecartledge.com/*", zone_name = "lukecartledge.com" }]
+# Custom domain: stats.lukecartledge.com
+# Managed via Workers Custom Domains (not routes) — configured in Cloudflare dashboard
 
 # Environment variables (non-secret)
 [vars]
