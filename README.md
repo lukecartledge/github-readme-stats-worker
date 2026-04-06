@@ -33,9 +33,9 @@ The public `github-readme-stats.vercel.app` instance is shared by thousands of u
 
 ## Routes
 
-| Route | Card |
-|---|---|
-| `/api?username=X` | GitHub stats |
+| Route                       | Card                |
+| --------------------------- | ------------------- |
+| `/api?username=X`           | GitHub stats        |
 | `/api/top-langs?username=X` | Most used languages |
 
 ## Quick start
@@ -97,73 +97,73 @@ npm run dev
 
 ## Stats card options
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `username` | string | **required** | GitHub username |
-| `theme` | string | `default` | Card theme (see [themes](#themes)) |
-| `hide` | string | — | Comma-separated stats to hide (`stars`, `commits`, `prs`, `issues`, `contribs`) |
-| `show` | string | — | Additional stats to show (`prs_merged`, `prs_merged_percentage`, `discussions_started`, `discussions_answered`) |
-| `show_icons` | boolean | `false` | Show icons next to stats |
-| `hide_title` | boolean | `false` | Hide the card title |
-| `hide_border` | boolean | `false` | Hide the card border |
-| `hide_rank` | boolean | `false` | Hide the rank circle |
-| `include_all_commits` | boolean | `false` | Count all commits (not just current year) |
-| `count_private` | boolean | `false` | Include private repo contributions |
-| `line_height` | number | `25` | Line height between stats |
-| `custom_title` | string | — | Custom card title |
-| `locale` | string | `en` | Locale for card text ([supported locales](https://github.com/anuraghazra/github-readme-stats/blob/master/src/translations.js)) |
-| `disable_animations` | boolean | `false` | Disable all animations |
-| `card_width` | number | `450` | Card width in pixels |
-| `rank_icon` | string | `default` | Rank icon style (`default`, `github`, `percentile`) |
-| `number_format` | string | `short` | Number format (`short`, `long`) |
-| `border_radius` | number | `4.5` | Border radius in pixels |
-| `border_color` | string | — | Custom border color (hex without `#`) |
-| `title_color` | string | — | Custom title color |
-| `text_color` | string | — | Custom text color |
-| `icon_color` | string | — | Custom icon color |
-| `bg_color` | string | — | Custom background color |
-| `ring_color` | string | — | Custom rank ring color |
-| `text_bold` | boolean | `true` | Bold stat values |
-| `cache_seconds` | number | `14400` | Cache TTL in seconds (min 7200) |
+| Parameter             | Type    | Default      | Description                                                                                                                    |
+| --------------------- | ------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `username`            | string  | **required** | GitHub username                                                                                                                |
+| `theme`               | string  | `default`    | Card theme (see [themes](#themes))                                                                                             |
+| `hide`                | string  | —            | Comma-separated stats to hide (`stars`, `commits`, `prs`, `issues`, `contribs`)                                                |
+| `show`                | string  | —            | Additional stats to show (`prs_merged`, `prs_merged_percentage`, `discussions_started`, `discussions_answered`)                |
+| `show_icons`          | boolean | `false`      | Show icons next to stats                                                                                                       |
+| `hide_title`          | boolean | `false`      | Hide the card title                                                                                                            |
+| `hide_border`         | boolean | `false`      | Hide the card border                                                                                                           |
+| `hide_rank`           | boolean | `false`      | Hide the rank circle                                                                                                           |
+| `include_all_commits` | boolean | `false`      | Count all commits (not just current year)                                                                                      |
+| `count_private`       | boolean | `false`      | Include private repo contributions                                                                                             |
+| `line_height`         | number  | `25`         | Line height between stats                                                                                                      |
+| `custom_title`        | string  | —            | Custom card title                                                                                                              |
+| `locale`              | string  | `en`         | Locale for card text ([supported locales](https://github.com/anuraghazra/github-readme-stats/blob/master/src/translations.js)) |
+| `disable_animations`  | boolean | `false`      | Disable all animations                                                                                                         |
+| `card_width`          | number  | `450`        | Card width in pixels                                                                                                           |
+| `rank_icon`           | string  | `default`    | Rank icon style (`default`, `github`, `percentile`)                                                                            |
+| `number_format`       | string  | `short`      | Number format (`short`, `long`)                                                                                                |
+| `border_radius`       | number  | `4.5`        | Border radius in pixels                                                                                                        |
+| `border_color`        | string  | —            | Custom border color (hex without `#`)                                                                                          |
+| `title_color`         | string  | —            | Custom title color                                                                                                             |
+| `text_color`          | string  | —            | Custom text color                                                                                                              |
+| `icon_color`          | string  | —            | Custom icon color                                                                                                              |
+| `bg_color`            | string  | —            | Custom background color                                                                                                        |
+| `ring_color`          | string  | —            | Custom rank ring color                                                                                                         |
+| `text_bold`           | boolean | `true`       | Bold stat values                                                                                                               |
+| `cache_seconds`       | number  | `14400`      | Cache TTL in seconds (min 7200)                                                                                                |
 
 ## Top languages card options
 
-| Parameter | Type | Default | Description |
-|---|---|---|---|
-| `username` | string | **required** | GitHub username |
-| `theme` | string | `default` | Card theme (see [themes](#themes)) |
-| `layout` | string | `normal` | Layout style: `normal`, `compact`, `donut`, `donut-vertical`, `pie` |
-| `hide` | string | — | Comma-separated languages to hide |
-| `langs_count` | number | `5` | Number of languages to show (1–20) |
-| `exclude_repo` | string | — | Comma-separated repos to exclude |
-| `size_weight` | number | `1` | Weight for language byte size |
-| `count_weight` | number | `0` | Weight for language repo count |
-| `custom_title` | string | — | Custom card title |
-| `locale` | string | `en` | Locale for card text |
-| `hide_title` | boolean | `false` | Hide the card title |
-| `hide_border` | boolean | `false` | Hide the card border |
-| `hide_progress` | boolean | `false` | Hide the progress bars |
-| `disable_animations` | boolean | `false` | Disable all animations |
-| `card_width` | number | `300` | Card width in pixels |
-| `border_radius` | number | `4.5` | Border radius in pixels |
-| `stats_format` | string | `percentages` | Format: `bytes` or `percentages` |
-| `cache_seconds` | number | `14400` | Cache TTL in seconds (min 7200) |
+| Parameter            | Type    | Default       | Description                                                         |
+| -------------------- | ------- | ------------- | ------------------------------------------------------------------- |
+| `username`           | string  | **required**  | GitHub username                                                     |
+| `theme`              | string  | `default`     | Card theme (see [themes](#themes))                                  |
+| `layout`             | string  | `normal`      | Layout style: `normal`, `compact`, `donut`, `donut-vertical`, `pie` |
+| `hide`               | string  | —             | Comma-separated languages to hide                                   |
+| `langs_count`        | number  | `5`           | Number of languages to show (1–20)                                  |
+| `exclude_repo`       | string  | —             | Comma-separated repos to exclude                                    |
+| `size_weight`        | number  | `1`           | Weight for language byte size                                       |
+| `count_weight`       | number  | `0`           | Weight for language repo count                                      |
+| `custom_title`       | string  | —             | Custom card title                                                   |
+| `locale`             | string  | `en`          | Locale for card text                                                |
+| `hide_title`         | boolean | `false`       | Hide the card title                                                 |
+| `hide_border`        | boolean | `false`       | Hide the card border                                                |
+| `hide_progress`      | boolean | `false`       | Hide the progress bars                                              |
+| `disable_animations` | boolean | `false`       | Disable all animations                                              |
+| `card_width`         | number  | `300`         | Card width in pixels                                                |
+| `border_radius`      | number  | `4.5`         | Border radius in pixels                                             |
+| `stats_format`       | string  | `percentages` | Format: `bytes` or `percentages`                                    |
+| `cache_seconds`      | number  | `14400`       | Cache TTL in seconds (min 7200)                                     |
 
 ## Themes
 
 62 themes available. A few popular ones:
 
-| Theme | Preview |
-|---|---|
-| `gotham` | Dark green on black |
-| `radical` | Pink/purple gradient accent |
-| `tokyonight` | Cool blue/purple |
-| `dracula` | Classic Dracula palette |
-| `nord` | Arctic, north-bluish |
-| `catppuccin_mocha` | Warm pastel dark |
-| `github_dark` | GitHub's dark mode |
-| `onedark` | Atom One Dark |
-| `transparent` | Transparent background |
+| Theme              | Preview                     |
+| ------------------ | --------------------------- |
+| `gotham`           | Dark green on black         |
+| `radical`          | Pink/purple gradient accent |
+| `tokyonight`       | Cool blue/purple            |
+| `dracula`          | Classic Dracula palette     |
+| `nord`             | Arctic, north-bluish        |
+| `catppuccin_mocha` | Warm pastel dark            |
+| `github_dark`      | GitHub's dark mode          |
+| `onedark`          | Atom One Dark               |
+| `transparent`      | Transparent background      |
 
 <details>
 <summary>All 62 themes</summary>
@@ -204,26 +204,26 @@ npm run dev
 
 ### Required GitHub secrets
 
-| Secret | Description |
-|---|---|
+| Secret                 | Description                                       |
+| ---------------------- | ------------------------------------------------- |
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with Workers edit permission |
 
 ### Required Cloudflare secrets
 
 Set via `npx wrangler secret put <NAME>`:
 
-| Secret | Description |
-|---|---|
-| `GH_PAT_1` | GitHub PAT with `read:user` scope (required) |
+| Secret     | Description                                     |
+| ---------- | ----------------------------------------------- |
+| `GH_PAT_1` | GitHub PAT with `read:user` scope (required)    |
 | `GH_PAT_2` | Optional additional PAT for rate limit rotation |
 
 ## Environment variables
 
 Set in `wrangler.toml` under `[vars]`:
 
-| Variable | Default | Description |
-|---|---|---|
-| `CACHE_MAX_AGE` | `1800` | Default cache TTL in seconds |
+| Variable        | Default | Description                  |
+| --------------- | ------- | ---------------------------- |
+| `CACHE_MAX_AGE` | `1800`  | Default cache TTL in seconds |
 
 ## Upstream
 
