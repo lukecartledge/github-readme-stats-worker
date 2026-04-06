@@ -68,10 +68,18 @@ const readUserFromResponse = (response) => {
   return user
 }
 
-const getYearWindow = (year) => ({
-  from: `${year}-01-01T00:00:00Z`,
-  to: `${year}-12-31T23:59:59Z`,
-})
+const getYearWindow = (year) => {
+  const now = new Date()
+  const currentYear = now.getUTCFullYear()
+
+  return {
+    from: `${year}-01-01T00:00:00Z`,
+    to:
+      year === currentYear
+        ? now.toISOString().split('T')[0] + 'T23:59:59Z'
+        : `${year}-12-31T23:59:59Z`,
+  }
+}
 
 const getContributionStats = (contributionsByDate) => {
   const dates = Object.keys(contributionsByDate).sort()
