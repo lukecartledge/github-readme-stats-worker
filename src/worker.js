@@ -410,8 +410,18 @@ const buildCacheKey = (url) => {
 
 const CACHED_ROUTES = new Set(['/api', '/api/top-langs', '/api/pin', '/api/streak'])
 
+const writeAnalytics = (env, { route, username, theme, cacheStatus, responseTime }) => {
+  if (!env.ANALYTICS) return
+  env.ANALYTICS.writeDataPoint({
+    blobs: [route, username || '', theme || 'default', cacheStatus],
+    doubles: [responseTime],
+    indexes: [route],
+  })
+}
+
 export default {
   async fetch(request, env, ctx) {
+    const startTime = Date.now()
     const url = new URL(request.url)
     const pathname = url.pathname.replace(/\/+$/, '') || '/'
 
@@ -428,6 +438,7 @@ export default {
       })
     }
 
+    const params = Object.fromEntries(url.searchParams.entries())
     const cache = caches.default
     const cacheKey = buildCacheKey(url)
 
@@ -435,6 +446,13 @@ export default {
     if (cached) {
       const response = new Response(cached.body, cached)
       response.headers.set('X-Cache', 'HIT')
+      writeAnalytics(env, {
+        route: pathname,
+        username: params.username,
+        theme: params.theme,
+        cacheStatus: 'HIT',
+        responseTime: Date.now() - startTime,
+      })
       return response
     }
 
@@ -454,6 +472,14 @@ export default {
       response.headers.set('X-Cache', 'MISS')
       ctx.waitUntil(cache.put(cacheKey, cloned))
     }
+
+    writeAnalytics(env, {
+      route: pathname,
+      username: params.username,
+      theme: params.theme,
+      cacheStatus: 'MISS',
+      responseTime: Date.now() - startTime,
+    })
 
     return response
   },
