@@ -189,6 +189,29 @@ describe('Worker fetch handler', () => {
     })
   })
 
+  describe('/health route', () => {
+    it('returns JSON health response', async () => {
+      const response = await worker.fetch(createRequest('/health'), env, createCtx())
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('application/json')
+      const body = await response.json()
+      expect(body.status).toBe('ok')
+      expect(body.timestamp).toBeTypeOf('number')
+    })
+
+    it('does not hit cache for health endpoint', async () => {
+      await worker.fetch(createRequest('/health'), env, createCtx())
+      expect(mockCache.match).not.toHaveBeenCalled()
+    })
+
+    it('returns health response with trailing slash', async () => {
+      const response = await worker.fetch(createRequest('/health/'), env, createCtx())
+      expect(response.status).toBe(200)
+      const body = await response.json()
+      expect(body.status).toBe('ok')
+    })
+  })
+
   describe('Cache API integration', () => {
     it('returns cached response on cache hit with X-Cache: HIT', async () => {
       const cachedBody = '<svg>cached</svg>'

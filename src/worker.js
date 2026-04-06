@@ -260,12 +260,20 @@ const buildCacheKey = (url) => {
   return new Request(normalized.toString())
 }
 
+const CACHED_ROUTES = new Set(['/api', '/api/top-langs'])
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
     const pathname = url.pathname.replace(/\/+$/, '') || '/'
 
-    if (pathname !== '/api' && pathname !== '/api/top-langs') {
+    if (pathname === '/health') {
+      return new Response(JSON.stringify({ status: 'ok', timestamp: Date.now() }), {
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (!CACHED_ROUTES.has(pathname)) {
       return new Response('Not Found', {
         status: 404,
         headers: { 'Content-Type': 'text/plain; charset=utf-8' },
@@ -285,7 +293,7 @@ export default {
     let response
     if (pathname === '/api') {
       response = await handleStatsRoute(url, env)
-    } else {
+    } else if (pathname === '/api/top-langs') {
       response = await handleTopLanguagesRoute(url, env)
     }
 
