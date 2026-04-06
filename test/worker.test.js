@@ -8,8 +8,13 @@ vi.mock('../src/fetchers/top-languages.js', () => ({
   fetchTopLanguages: vi.fn(),
 }))
 
+vi.mock('../src/fetchers/repo.js', () => ({
+  fetchRepo: vi.fn(),
+}))
+
 const { fetchStats } = await import('../src/fetchers/stats.js')
 const { fetchTopLanguages } = await import('../src/fetchers/top-languages.js')
+const { fetchRepo } = await import('../src/fetchers/repo.js')
 const worker = (await import('../src/worker.js')).default
 
 const mockStats = {
@@ -32,6 +37,17 @@ const mockTopLangs = {
   CSS: { name: 'CSS', color: '#563d7c', size: 2000, count: 2 },
 }
 
+const mockRepoData = {
+  name: 'test-repo',
+  nameWithOwner: 'testuser/test-repo',
+  description: 'A test repository',
+  primaryLanguage: { color: '#f1e05a', id: 'lang1', name: 'JavaScript' },
+  isArchived: false,
+  isTemplate: false,
+  starCount: 42,
+  forkCount: 10,
+}
+
 const createRequest = (path) => new Request(`https://stats.example.com${path}`)
 
 const createCtx = () => ({ waitUntil: vi.fn() })
@@ -48,6 +64,7 @@ describe('Worker fetch handler', () => {
     vi.clearAllMocks()
     fetchStats.mockResolvedValue(mockStats)
     fetchTopLanguages.mockResolvedValue(mockTopLangs)
+    fetchRepo.mockResolvedValue(mockRepoData)
     mockCache.match.mockResolvedValue(undefined)
     mockCache.put.mockResolvedValue(undefined)
     globalThis.caches = { default: mockCache }
@@ -186,6 +203,78 @@ describe('Worker fetch handler', () => {
       )
       const body = await response.text()
       expect(body).toContain('Locale not found')
+    })
+  })
+
+  describe('/api/pin route', () => {
+    it('routes /api/pin to pin handler', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/pin?username=testuser&repo=test-repo'),
+        env,
+        createCtx(),
+      )
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+      const body = await response.text()
+      expect(body).toContain('<svg')
+    })
+
+    it('routes /api/pin/ with trailing slash', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/pin/?username=testuser&repo=test-repo'),
+        env,
+        createCtx(),
+      )
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+    })
+
+    it('renders error SVG when fetchRepo rejects', async () => {
+      fetchRepo.mockRejectedValue(new Error('Repo not found'))
+      const response = await worker.fetch(
+        createRequest('/api/pin?username=testuser&repo=nonexistent'),
+        env,
+        createCtx(),
+      )
+      expect(response.status).toBe(200)
+      const body = await response.text()
+      expect(body).toContain('Something went wrong')
+    })
+
+    it('renders error for invalid locale', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/pin?username=test&repo=test-repo&locale=zz-ZZ'),
+        env,
+        createCtx(),
+      )
+      const body = await response.text()
+      expect(body).toContain('Locale not found')
+    })
+
+    it('passes query params to fetchRepo', async () => {
+      await worker.fetch(
+        createRequest('/api/pin?username=testuser&repo=test-repo'),
+        env,
+        createCtx(),
+      )
+      expect(fetchRepo).toHaveBeenCalledWith('testuser', 'test-repo', env)
+    })
+
+    it('sets cache headers on success', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/pin?username=testuser&repo=test-repo'),
+        env,
+        createCtx(),
+      )
+      const cacheControl = response.headers.get('Cache-Control')
+      expect(cacheControl).toBeTruthy()
+    })
+
+    it('caches pin route responses', async () => {
+      const ctx = createCtx()
+      await worker.fetch(createRequest('/api/pin?username=testuser&repo=test-repo'), env, ctx)
+      expect(ctx.waitUntil).toHaveBeenCalledTimes(1)
+      expect(mockCache.put).toHaveBeenCalledTimes(1)
     })
   })
 
