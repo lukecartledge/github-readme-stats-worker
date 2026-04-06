@@ -246,21 +246,55 @@ const handleTopLanguagesRoute = async (url, env) => {
   }
 }
 
+/**
+ * Builds a normalized cache key URL.
+ * Strips trailing slashes and sorts query params for consistent cache hits.
+ *
+ * @param {URL} url
+ * @returns {Request}
+ */
+const buildCacheKey = (url) => {
+  const normalized = new URL(url.toString())
+  normalized.pathname = normalized.pathname.replace(/\/+$/, '') || '/'
+  normalized.searchParams.sort()
+  return new Request(normalized.toString())
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url)
+    const pathname = url.pathname.replace(/\/+$/, '') || '/'
 
-    if (url.pathname === '/api') {
-      return handleStatsRoute(url, env)
+    if (pathname !== '/api' && pathname !== '/api/top-langs') {
+      return new Response('Not Found', {
+        status: 404,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+      })
     }
 
-    if (url.pathname === '/api/top-langs') {
-      return handleTopLanguagesRoute(url, env)
+    const cache = caches.default
+    const cacheKey = buildCacheKey(url)
+
+    const cached = await cache.match(cacheKey)
+    if (cached) {
+      const response = new Response(cached.body, cached)
+      response.headers.set('X-Cache', 'HIT')
+      return response
     }
 
-    return new Response('Not Found', {
-      status: 404,
-      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-    })
+    let response
+    if (pathname === '/api') {
+      response = await handleStatsRoute(url, env)
+    } else {
+      response = await handleTopLanguagesRoute(url, env)
+    }
+
+    if (response.status === 200) {
+      const cloned = response.clone()
+      response.headers.set('X-Cache', 'MISS')
+      ctx.waitUntil(cache.put(cacheKey, cloned))
+    }
+
+    return response
   },
 }
