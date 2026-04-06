@@ -39,13 +39,13 @@ The public `github-readme-stats.vercel.app` instance is shared by thousands of u
 
 ## Routes
 
-| Route                            | Card                  |
-| -------------------------------- | --------------------- |
-| `/api?username=X`                | GitHub stats          |
-| `/api/top-langs?username=X`      | Most used languages   |
-| `/api/pin?username=X&repo=Y`     | Repo pin card         |
-| `/api/streak?username=X`         | Contribution streak   |
-| `/health`                        | JSON health check     |
+| Route                        | Card                |
+| ---------------------------- | ------------------- |
+| `/api?username=X`            | GitHub stats        |
+| `/api/top-langs?username=X`  | Most used languages |
+| `/api/pin?username=X&repo=Y` | Repo pin card       |
+| `/api/streak?username=X`     | Contribution streak |
+| `/health`                    | JSON health check   |
 
 ## Quick start
 
@@ -162,22 +162,22 @@ npm run dev
 
 ## Repo pin card options
 
-| Parameter                  | Type    | Default      | Description                       |
-| -------------------------- | ------- | ------------ | --------------------------------- |
-| `username`                 | string  | **required** | GitHub username                   |
-| `repo`                     | string  | **required** | Repository name                   |
-| `theme`                    | string  | `default`    | Card theme (see [themes](#themes)) |
-| `show_owner`               | boolean | `false`      | Show the repo owner name          |
-| `hide_border`              | boolean | `false`      | Hide the card border              |
-| `locale`                   | string  | `en`         | Locale for card text              |
-| `description_lines_count`  | number  | `2`          | Max lines for description         |
-| `border_radius`            | number  | `4.5`        | Border radius in pixels           |
-| `border_color`             | string  | —            | Custom border color               |
-| `title_color`              | string  | —            | Custom title color                |
-| `text_color`               | string  | —            | Custom text color                 |
-| `icon_color`               | string  | —            | Custom icon color                 |
-| `bg_color`                 | string  | —            | Custom background color           |
-| `cache_seconds`            | number  | `14400`      | Cache TTL in seconds              |
+| Parameter                 | Type    | Default      | Description                        |
+| ------------------------- | ------- | ------------ | ---------------------------------- |
+| `username`                | string  | **required** | GitHub username                    |
+| `repo`                    | string  | **required** | Repository name                    |
+| `theme`                   | string  | `default`    | Card theme (see [themes](#themes)) |
+| `show_owner`              | boolean | `false`      | Show the repo owner name           |
+| `hide_border`             | boolean | `false`      | Hide the card border               |
+| `locale`                  | string  | `en`         | Locale for card text               |
+| `description_lines_count` | number  | `2`          | Max lines for description          |
+| `border_radius`           | number  | `4.5`        | Border radius in pixels            |
+| `border_color`            | string  | —            | Custom border color                |
+| `title_color`             | string  | —            | Custom title color                 |
+| `text_color`              | string  | —            | Custom text color                  |
+| `icon_color`              | string  | —            | Custom icon color                  |
+| `bg_color`                | string  | —            | Custom background color            |
+| `cache_seconds`           | number  | `14400`      | Cache TTL in seconds               |
 
 ## Streak stats card options
 
