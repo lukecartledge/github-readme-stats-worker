@@ -1,9 +1,9 @@
 // @ts-check
 
-import { SECONDARY_ERROR_MESSAGES, TRY_AGAIN_LATER } from "./error.js";
-import { getCardColors } from "./color.js";
-import { encodeHTML } from "./html.js";
-import { clampValue } from "./ops.js";
+import { SECONDARY_ERROR_MESSAGES, TRY_AGAIN_LATER } from './error.js'
+import { getCardColors } from './color.js'
+import { encodeHTML } from './html.js'
+import { clampValue } from './ops.js'
 
 /**
  * Auto layout utility, allows us to layout things vertically or horizontally with
@@ -17,18 +17,18 @@ import { clampValue } from "./ops.js";
  * @returns {string[]} Array of items with proper layout.
  */
 const flexLayout = ({ items, gap, direction, sizes = [] }) => {
-  let lastSize = 0;
+  let lastSize = 0
   // filter() for filtering out empty strings
   return items.filter(Boolean).map((item, i) => {
-    const size = sizes[i] || 0;
-    let transform = `translate(${lastSize}, 0)`;
-    if (direction === "column") {
-      transform = `translate(0, ${lastSize})`;
+    const size = sizes[i] || 0
+    let transform = `translate(${lastSize}, 0)`
+    if (direction === 'column') {
+      transform = `translate(0, ${lastSize})`
     }
-    lastSize += size + gap;
-    return `<g transform="${transform}">${item}</g>`;
-  });
-};
+    lastSize += size + gap
+    return `<g transform="${transform}">${item}</g>`
+  })
+}
 
 /**
  * Creates a node to display the primary programming language of the repository/gist.
@@ -43,8 +43,8 @@ const createLanguageNode = (langName, langColor) => {
       <circle data-testid="lang-color" cx="0" cy="-5" r="6" fill="${langColor}" />
       <text data-testid="lang-name" class="gray" x="15">${langName}</text>
     </g>
-    `;
-};
+    `
+}
 
 /**
  * Create a node to indicate progress in percentage along a horizontal line.
@@ -68,7 +68,7 @@ const createProgressNode = ({
   progressBarBackgroundColor,
   delay,
 }) => {
-  const progressPercentage = clampValue(progress, 2, 100);
+  const progressPercentage = clampValue(progress, 2, 100)
 
   return `
     <svg width="${width}" x="${x}" y="${y}">
@@ -83,8 +83,8 @@ const createProgressNode = ({
         />
       </svg>
     </svg>
-  `;
-};
+  `
+}
 
 /**
  * Creates an icon with label to display repository/gist stats like forks, stars, etc.
@@ -96,8 +96,8 @@ const createProgressNode = ({
  * @returns {string} Icon with label SVG object.
  */
 const iconWithLabel = (icon, label, testid, iconSize) => {
-  if (typeof label === "number" && label <= 0) {
-    return "";
+  if (typeof label === 'number' && label <= 0) {
+    return ''
   }
   const iconSvg = `
       <svg
@@ -110,18 +110,15 @@ const iconWithLabel = (icon, label, testid, iconSize) => {
       >
         ${icon}
       </svg>
-    `;
-  const text = `<text data-testid="${testid}" class="gray">${label}</text>`;
-  return flexLayout({ items: [iconSvg, text], gap: 20 }).join("");
-};
+    `
+  const text = `<text data-testid="${testid}" class="gray">${label}</text>`
+  return flexLayout({ items: [iconSvg, text], gap: 20 }).join('')
+}
 
 // Script parameters.
-const ERROR_CARD_LENGTH = 576.5;
+const ERROR_CARD_LENGTH = 576.5
 
-const UPSTREAM_API_ERRORS = [
-  TRY_AGAIN_LATER,
-  SECONDARY_ERROR_MESSAGES.MAX_RETRY,
-];
+const UPSTREAM_API_ERRORS = [TRY_AGAIN_LATER, SECONDARY_ERROR_MESSAGES.MAX_RETRY]
 
 /**
  * Renders error message on the card.
@@ -138,30 +135,26 @@ const UPSTREAM_API_ERRORS = [
  * @param {boolean=} args.renderOptions.show_repo_link Whether to show repo link or not.
  * @returns {string} The SVG markup.
  */
-const renderError = ({
-  message,
-  secondaryMessage = "",
-  renderOptions = {},
-}) => {
+const renderError = ({ message, secondaryMessage = '', renderOptions = {} }) => {
   const {
     title_color,
     text_color,
     bg_color,
     border_color,
-    theme = "default",
+    theme = 'default',
     show_repo_link = true,
-  } = renderOptions;
+  } = renderOptions
 
   // returns theme based colors with proper overrides and defaults
   const { titleColor, textColor, bgColor, borderColor } = getCardColors({
     title_color,
     text_color,
-    icon_color: "",
+    icon_color: '',
     bg_color,
     border_color,
-    ring_color: "",
+    ring_color: '',
     theme,
-  });
+  })
 
   return `
     <svg width="${ERROR_CARD_LENGTH}"  height="120" viewBox="0 0 ${ERROR_CARD_LENGTH} 120" fill="${bgColor}" xmlns="http://www.w3.org/2000/svg">
@@ -175,16 +168,16 @@ const renderError = ({
     }" height="99%" rx="4.5" fill="${bgColor}" stroke="${borderColor}"/>
     <text x="25" y="45" class="text">Something went wrong!${
       UPSTREAM_API_ERRORS.includes(secondaryMessage) || !show_repo_link
-        ? ""
-        : " file an issue at https://tiny.one/readme-stats"
+        ? ''
+        : ' file an issue at https://tiny.one/readme-stats'
     }</text>
     <text data-testid="message" x="25" y="55" class="text small">
       <tspan x="25" dy="18">${encodeHTML(message)}</tspan>
       <tspan x="25" dy="18" class="gray">${secondaryMessage}</tspan>
     </text>
     </svg>
-  `;
-};
+  `
+}
 
 /**
  * Retrieve text length.
@@ -217,16 +210,14 @@ const measureText = (str, fontSize = 10) => {
     0.5, 0.721875, 0.5, 0.5, 0.5, 0.3546875, 0.259375, 0.353125, 0.5890625,
   ];
 
-  const avg = 0.5279276315789471;
+  const avg = 0.5279276315789471
   return (
     str
-      .split("")
-      .map((c) =>
-        c.charCodeAt(0) < widths.length ? widths[c.charCodeAt(0)] : avg,
-      )
+      .split('')
+      .map((c) => (c.charCodeAt(0) < widths.length ? widths[c.charCodeAt(0)] : avg))
       .reduce((cur, acc) => acc + cur) * fontSize
-  );
-};
+  )
+}
 
 export {
   ERROR_CARD_LENGTH,
@@ -236,4 +227,4 @@ export {
   iconWithLabel,
   flexLayout,
   measureText,
-};
+}

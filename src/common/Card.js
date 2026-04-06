@@ -1,7 +1,7 @@
 // @ts-check
 
-import { encodeHTML } from "./html.js";
-import { flexLayout } from "./render.js";
+import { encodeHTML } from './html.js'
+import { flexLayout } from './render.js'
 
 class Card {
   /**
@@ -27,39 +27,36 @@ class Card {
     border_radius = 4.5,
     colors = {},
     customTitle,
-    defaultTitle = "",
+    defaultTitle = '',
     titlePrefixIcon,
   }) {
-    this.width = width;
-    this.height = height;
+    this.width = width
+    this.height = height
 
-    this.hideBorder = false;
-    this.hideTitle = false;
+    this.hideBorder = false
+    this.hideTitle = false
 
-    this.border_radius = border_radius;
+    this.border_radius = border_radius
 
     // returns theme based colors with proper overrides and defaults
-    this.colors = colors;
-    this.title =
-      customTitle === undefined
-        ? encodeHTML(defaultTitle)
-        : encodeHTML(customTitle);
+    this.colors = colors
+    this.title = customTitle === undefined ? encodeHTML(defaultTitle) : encodeHTML(customTitle)
 
-    this.css = "";
+    this.css = ''
 
-    this.paddingX = 25;
-    this.paddingY = 35;
-    this.titlePrefixIcon = titlePrefixIcon;
-    this.animations = true;
-    this.a11yTitle = "";
-    this.a11yDesc = "";
+    this.paddingX = 25
+    this.paddingY = 35
+    this.titlePrefixIcon = titlePrefixIcon
+    this.animations = true
+    this.a11yTitle = ''
+    this.a11yDesc = ''
   }
 
   /**
    * @returns {void}
    */
   disableAnimations() {
-    this.animations = false;
+    this.animations = false
   }
 
   /**
@@ -69,8 +66,8 @@ class Card {
    * @returns {void}
    */
   setAccessibilityLabel({ title, desc }) {
-    this.a11yTitle = title;
-    this.a11yDesc = desc;
+    this.a11yTitle = title
+    this.a11yDesc = desc
   }
 
   /**
@@ -78,7 +75,7 @@ class Card {
    * @returns {void}
    */
   setCSS(value) {
-    this.css = value;
+    this.css = value
   }
 
   /**
@@ -86,7 +83,7 @@ class Card {
    * @returns {void}
    */
   setHideBorder(value) {
-    this.hideBorder = value;
+    this.hideBorder = value
   }
 
   /**
@@ -94,9 +91,9 @@ class Card {
    * @returns {void}
    */
   setHideTitle(value) {
-    this.hideTitle = value;
+    this.hideTitle = value
     if (value) {
-      this.height -= 30;
+      this.height -= 30
     }
   }
 
@@ -105,7 +102,7 @@ class Card {
    * @returns {void}
    */
   setTitle(text) {
-    this.title = text;
+    this.title = text
   }
 
   /**
@@ -119,7 +116,7 @@ class Card {
         class="header"
         data-testid="header"
       >${this.title}</text>
-    `;
+    `
 
     const prefixIcon = `
       <svg
@@ -133,30 +130,30 @@ class Card {
       >
         ${this.titlePrefixIcon}
       </svg>
-    `;
+    `
     return `
       <g
         data-testid="card-title"
         transform="translate(${this.paddingX}, ${this.paddingY})"
       >
         ${flexLayout({
-          items: [this.titlePrefixIcon ? prefixIcon : "", titleText],
+          items: [this.titlePrefixIcon ? prefixIcon : '', titleText],
           gap: 25,
-        }).join("")}
+        }).join('')}
       </g>
-    `;
+    `
   }
 
   /**
    * @returns {string} The rendered card gradient.
    */
   renderGradient() {
-    if (typeof this.colors.bgColor !== "object") {
-      return "";
+    if (typeof this.colors.bgColor !== 'object') {
+      return ''
     }
 
-    const gradients = this.colors.bgColor.slice(1);
-    return typeof this.colors.bgColor === "object"
+    const gradients = this.colors.bgColor.slice(1)
+    return typeof this.colors.bgColor === 'object'
       ? `
         <defs>
           <linearGradient
@@ -165,13 +162,13 @@ class Card {
             gradientUnits="userSpaceOnUse"
           >
             ${gradients.map((grad, index) => {
-              let offset = (index * 100) / (gradients.length - 1);
-              return `<stop offset="${offset}%" stop-color="#${grad}" />`;
+              let offset = (index * 100) / (gradients.length - 1)
+              return `<stop offset="${offset}%" stop-color="#${grad}" />`
             })}
           </linearGradient>
         </defs>
         `
-      : "";
+      : ''
   }
 
   /**
@@ -198,8 +195,8 @@ class Card {
           opacity: 1;
         }
       }
-    `;
-  };
+    `
+  }
 
   /**
    * @param {string} body The inner body of the card.
@@ -234,7 +231,7 @@ class Card {
           ${
             this.animations === false
               ? `* { animation-duration: 0s !important; animation-delay: 0s !important; }`
-              : ""
+              : ''
           }
         </style>
 
@@ -248,28 +245,22 @@ class Card {
           height="99%"
           stroke="${this.colors.borderColor}"
           width="${this.width - 1}"
-          fill="${
-            typeof this.colors.bgColor === "object"
-              ? "url(#gradient)"
-              : this.colors.bgColor
-          }"
+          fill="${typeof this.colors.bgColor === 'object' ? 'url(#gradient)' : this.colors.bgColor}"
           stroke-opacity="${this.hideBorder ? 0 : 1}"
         />
 
-        ${this.hideTitle ? "" : this.renderTitle()}
+        ${this.hideTitle ? '' : this.renderTitle()}
 
         <g
           data-testid="main-card-body"
-          transform="translate(0, ${
-            this.hideTitle ? this.paddingX : this.paddingY + 20
-          })"
+          transform="translate(0, ${this.hideTitle ? this.paddingX : this.paddingY + 20})"
         >
           ${body}
         </g>
       </svg>
-    `;
+    `
   }
 }
 
-export { Card };
-export default Card;
+export { Card }
+export default Card

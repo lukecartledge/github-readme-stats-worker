@@ -9,7 +9,7 @@ updates:
     labels:
       - dependencies
     commit-message:
-      prefix: "deps"
+      prefix: 'deps'
 
   - package-ecosystem: github-actions
     directory: /
@@ -21,4 +21,4 @@ updates:
       - dependencies
       - ci
     commit-message:
-      prefix: "ci"
+      prefix: 'ci'

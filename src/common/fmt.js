@@ -1,7 +1,7 @@
 // @ts-check
 
-import wrap from "word-wrap";
-import { encodeHTML } from "./html.js";
+import wrap from 'word-wrap'
+import { encodeHTML } from './html.js'
 
 /**
  * Retrieves num with suffix k(thousands) precise to given decimal places.
@@ -11,19 +11,19 @@ import { encodeHTML } from "./html.js";
  * @returns {string|number} The formatted number.
  */
 const kFormatter = (num, precision) => {
-  const abs = Math.abs(num);
-  const sign = Math.sign(num);
+  const abs = Math.abs(num)
+  const sign = Math.sign(num)
 
-  if (typeof precision === "number" && !isNaN(precision)) {
-    return (sign * (abs / 1000)).toFixed(precision) + "k";
+  if (typeof precision === 'number' && !isNaN(precision)) {
+    return (sign * (abs / 1000)).toFixed(precision) + 'k'
   }
 
   if (abs < 1000) {
-    return sign * abs;
+    return sign * abs
   }
 
-  return sign * parseFloat((abs / 1000).toFixed(1)) + "k";
-};
+  return sign * parseFloat((abs / 1000).toFixed(1)) + 'k'
+}
 
 /**
  * Convert bytes to a human-readable string representation.
@@ -34,23 +34,23 @@ const kFormatter = (num, precision) => {
  */
 const formatBytes = (bytes) => {
   if (bytes < 0) {
-    throw new Error("Bytes must be a non-negative number");
+    throw new Error('Bytes must be a non-negative number')
   }
 
   if (bytes === 0) {
-    return "0 B";
+    return '0 B'
   }
 
-  const sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB"];
-  const base = 1024;
-  const i = Math.floor(Math.log(bytes) / Math.log(base));
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']
+  const base = 1024
+  const i = Math.floor(Math.log(bytes) / Math.log(base))
 
   if (i >= sizes.length) {
-    throw new Error("Bytes is too large to convert to a human-readable string");
+    throw new Error('Bytes is too large to convert to a human-readable string')
   }
 
-  return `${(bytes / Math.pow(base, i)).toFixed(1)} ${sizes[i]}`;
-};
+  return `${(bytes / Math.pow(base, i)).toFixed(1)} ${sizes[i]}`
+}
 
 /**
  * Split text over multiple lines based on the card width.
@@ -61,30 +61,30 @@ const formatBytes = (bytes) => {
  * @returns {string[]} Array of lines.
  */
 const wrapTextMultiline = (text, width = 59, maxLines = 3) => {
-  const fullWidthComma = "，";
-  const encoded = encodeHTML(text);
-  const isChinese = encoded.includes(fullWidthComma);
+  const fullWidthComma = '，'
+  const encoded = encodeHTML(text)
+  const isChinese = encoded.includes(fullWidthComma)
 
-  let wrapped = [];
+  let wrapped = []
 
   if (isChinese) {
-    wrapped = encoded.split(fullWidthComma); // Chinese full punctuation
+    wrapped = encoded.split(fullWidthComma) // Chinese full punctuation
   } else {
     wrapped = wrap(encoded, {
       width,
-    }).split("\n"); // Split wrapped lines to get an array of lines
+    }).split('\n') // Split wrapped lines to get an array of lines
   }
 
-  const lines = wrapped.map((line) => line.trim()).slice(0, maxLines); // Only consider maxLines lines
+  const lines = wrapped.map((line) => line.trim()).slice(0, maxLines) // Only consider maxLines lines
 
   // Add "..." to the last line if the text exceeds maxLines
   if (wrapped.length > maxLines) {
-    lines[maxLines - 1] += "...";
+    lines[maxLines - 1] += '...'
   }
 
   // Remove empty lines if text fits in less than maxLines lines
-  const multiLineText = lines.filter(Boolean);
-  return multiLineText;
-};
+  const multiLineText = lines.filter(Boolean)
+  return multiLineText
+}
 
-export { kFormatter, formatBytes, wrapTextMultiline };
+export { kFormatter, formatBytes, wrapTextMultiline }

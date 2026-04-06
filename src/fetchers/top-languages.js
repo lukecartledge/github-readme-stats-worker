@@ -1,11 +1,11 @@
 // @ts-check
 
-import { retryer } from "../common/retryer.js";
-import { logger } from "../common/log.js";
-import { getExcludeRepositories } from "../common/envs.js";
-import { CustomError, MissingParamError } from "../common/error.js";
-import { wrapTextMultiline } from "../common/fmt.js";
-import { request } from "../common/http.js";
+import { retryer } from '../common/retryer.js'
+import { logger } from '../common/log.js'
+import { getExcludeRepositories } from '../common/envs.js'
+import { CustomError, MissingParamError } from '../common/error.js'
+import { wrapTextMultiline } from '../common/fmt.js'
+import { request } from '../common/http.js'
 
 const fetcher = (variables, token) => {
   return request(
@@ -35,8 +35,8 @@ const fetcher = (variables, token) => {
     {
       Authorization: `token ${token}`,
     },
-  );
-};
+  )
+}
 
 const fetchTopLanguages = async (
   username,
@@ -46,63 +46,58 @@ const fetchTopLanguages = async (
   env = {},
 ) => {
   if (!username) {
-    throw new MissingParamError(["username"]);
+    throw new MissingParamError(['username'])
   }
 
-  const res = await retryer(fetcher, { login: username }, env);
+  const res = await retryer(fetcher, { login: username }, env)
 
   if (res.data === null) {
     throw new CustomError(
       `GitHub API returned HTTP ${res.status}: ${res.statusText}`,
       CustomError.GRAPHQL_ERROR,
-    );
+    )
   }
 
   if (res.data.errors) {
-    logger.error(res.data.errors);
-    if (res.data.errors[0].type === "NOT_FOUND") {
+    logger.error(res.data.errors)
+    if (res.data.errors[0].type === 'NOT_FOUND') {
       throw new CustomError(
-        res.data.errors[0].message || "Could not fetch user.",
+        res.data.errors[0].message || 'Could not fetch user.',
         CustomError.USER_NOT_FOUND,
-      );
+      )
     }
     if (res.data.errors[0].message) {
-      throw new CustomError(
-        wrapTextMultiline(res.data.errors[0].message, 90, 1)[0],
-        res.statusText,
-      );
+      throw new CustomError(wrapTextMultiline(res.data.errors[0].message, 90, 1)[0], res.statusText)
     }
     throw new CustomError(
-      "Something went wrong while trying to retrieve the language data using the GraphQL API.",
+      'Something went wrong while trying to retrieve the language data using the GraphQL API.',
       CustomError.GRAPHQL_ERROR,
-    );
+    )
   }
 
-  let repoNodes = res.data.data.user.repositories.nodes;
-  const repoToHide = {};
-  const allExcludedRepos = [...exclude_repo, ...getExcludeRepositories(env)];
+  let repoNodes = res.data.data.user.repositories.nodes
+  const repoToHide = {}
+  const allExcludedRepos = [...exclude_repo, ...getExcludeRepositories(env)]
 
   allExcludedRepos.forEach((repoName) => {
-    repoToHide[repoName] = true;
-  });
+    repoToHide[repoName] = true
+  })
 
-  repoNodes = repoNodes
-    .sort((a, b) => b.size - a.size)
-    .filter((name) => !repoToHide[name.name]);
+  repoNodes = repoNodes.sort((a, b) => b.size - a.size).filter((name) => !repoToHide[name.name])
 
-  let repoCount = 0;
+  let repoCount = 0
 
   const reducedRepoNodes = repoNodes
     .filter((node) => node.languages.edges.length > 0)
     .reduce((acc, curr) => curr.languages.edges.concat(acc), [])
     .reduce((acc, prev) => {
-      let langSize = prev.size;
+      let langSize = prev.size
 
       if (acc[prev.node.name] && prev.node.name === acc[prev.node.name].name) {
-        langSize = prev.size + acc[prev.node.name].size;
-        repoCount += 1;
+        langSize = prev.size + acc[prev.node.name].size
+        repoCount += 1
       } else {
-        repoCount = 1;
+        repoCount = 1
       }
 
       return {
@@ -113,24 +108,24 @@ const fetchTopLanguages = async (
           size: langSize,
           count: repoCount,
         },
-      };
-    }, {});
+      }
+    }, {})
 
   Object.keys(reducedRepoNodes).forEach((name) => {
     reducedRepoNodes[name].size =
       Math.pow(reducedRepoNodes[name].size, size_weight) *
-      Math.pow(reducedRepoNodes[name].count, count_weight);
-  });
+      Math.pow(reducedRepoNodes[name].count, count_weight)
+  })
 
   const topLangs = Object.keys(reducedRepoNodes)
     .sort((a, b) => reducedRepoNodes[b].size - reducedRepoNodes[a].size)
     .reduce((result, key) => {
-      result[key] = reducedRepoNodes[key];
-      return result;
-    }, {});
+      result[key] = reducedRepoNodes[key]
+      return result
+    }, {})
 
-  return topLangs;
-};
+  return topLangs
+}
 
-export { fetchTopLanguages };
-export default fetchTopLanguages;
+export { fetchTopLanguages }
+export default fetchTopLanguages

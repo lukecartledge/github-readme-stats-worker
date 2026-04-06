@@ -44,12 +44,14 @@ npm run test      # vitest
 ## Environment Variables
 
 Secrets (set via `wrangler secret put`):
+
 ```
 GH_PAT_1    # GitHub PAT (required, scope: read:user, repo)
 GH_PAT_2    # Optional additional PAT for rate-limit rotation
 ```
 
 Config (set in wrangler.toml `[vars]`):
+
 ```
 CACHE_MAX_AGE   # Cache TTL in seconds (default: 1800)
 ```

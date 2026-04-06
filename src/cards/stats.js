@@ -1,21 +1,21 @@
 // @ts-check
 
-import { Card } from "../common/Card.js";
-import { getCardColors } from "../common/color.js";
-import { CustomError } from "../common/error.js";
-import { kFormatter } from "../common/fmt.js";
-import { I18n } from "../common/I18n.js";
-import { icons, rankIcon } from "../common/icons.js";
-import { clampValue } from "../common/ops.js";
-import { flexLayout, measureText } from "../common/render.js";
-import { statCardLocales, wakatimeCardLocales } from "../translations.js";
+import { Card } from '../common/Card.js'
+import { getCardColors } from '../common/color.js'
+import { CustomError } from '../common/error.js'
+import { kFormatter } from '../common/fmt.js'
+import { I18n } from '../common/I18n.js'
+import { icons, rankIcon } from '../common/icons.js'
+import { clampValue } from '../common/ops.js'
+import { flexLayout, measureText } from '../common/render.js'
+import { statCardLocales, wakatimeCardLocales } from '../translations.js'
 
-const CARD_MIN_WIDTH = 287;
-const CARD_DEFAULT_WIDTH = 287;
-const RANK_CARD_MIN_WIDTH = 420;
-const RANK_CARD_DEFAULT_WIDTH = 450;
-const RANK_ONLY_CARD_MIN_WIDTH = 290;
-const RANK_ONLY_CARD_DEFAULT_WIDTH = 290;
+const CARD_MIN_WIDTH = 287
+const CARD_DEFAULT_WIDTH = 287
+const RANK_CARD_MIN_WIDTH = 420
+const RANK_CARD_DEFAULT_WIDTH = 450
+const RANK_ONLY_CARD_MIN_WIDTH = 290
+const RANK_ONLY_CARD_DEFAULT_WIDTH = 290
 
 /**
  * Long locales that need more space for text. Keep sorted alphabetically.
@@ -23,33 +23,33 @@ const RANK_ONLY_CARD_DEFAULT_WIDTH = 290;
  * @type {(keyof typeof wakatimeCardLocales["wakatimecard.title"])[]}
  */
 const LONG_LOCALES = [
-  "az",
-  "bg",
-  "cs",
-  "de",
-  "el",
-  "es",
-  "fil",
-  "fi",
-  "fr",
-  "hu",
-  "id",
-  "ja",
-  "ml",
-  "my",
-  "nl",
-  "pl",
-  "pt-br",
-  "pt-pt",
-  "ru",
-  "sr",
-  "sr-latn",
-  "sw",
-  "ta",
-  "uk-ua",
-  "uz",
-  "zh-tw",
-];
+  'az',
+  'bg',
+  'cs',
+  'de',
+  'el',
+  'es',
+  'fil',
+  'fi',
+  'fr',
+  'hu',
+  'id',
+  'ja',
+  'ml',
+  'my',
+  'nl',
+  'pl',
+  'pt-br',
+  'pt-pt',
+  'ru',
+  'sr',
+  'sr-latn',
+  'sw',
+  'ta',
+  'uk-ua',
+  'uz',
+  'zh-tw',
+]
 
 /**
  * Create a stats card text item.
@@ -82,38 +82,36 @@ const createTextNode = ({
   numberPrecision,
 }) => {
   const precision =
-    typeof numberPrecision === "number" && !isNaN(numberPrecision)
+    typeof numberPrecision === 'number' && !isNaN(numberPrecision)
       ? clampValue(numberPrecision, 0, 2)
-      : undefined;
+      : undefined
   const kValue =
-    numberFormat.toLowerCase() === "long" || id === "prs_merged_percentage"
+    numberFormat.toLowerCase() === 'long' || id === 'prs_merged_percentage'
       ? value
-      : kFormatter(value, precision);
-  const staggerDelay = (index + 3) * 150;
+      : kFormatter(value, precision)
+  const staggerDelay = (index + 3) * 150
 
-  const labelOffset = showIcons ? `x="25"` : "";
+  const labelOffset = showIcons ? `x="25"` : ''
   const iconSvg = showIcons
     ? `
     <svg data-testid="icon" class="icon" viewBox="0 0 16 16" version="1.1" width="16" height="16">
       ${icon}
     </svg>
   `
-    : "";
+    : ''
   return `
     <g class="stagger" style="animation-delay: ${staggerDelay}ms" transform="translate(25, 0)">
       ${iconSvg}
-      <text class="stat ${
-        bold ? " bold" : "not_bold"
-      }" ${labelOffset} y="12.5">${label}:</text>
+      <text class="stat ${bold ? ' bold' : 'not_bold'}" ${labelOffset} y="12.5">${label}:</text>
       <text
-        class="stat ${bold ? " bold" : "not_bold"}"
+        class="stat ${bold ? ' bold' : 'not_bold'}"
         x="${(showIcons ? 140 : 120) + shiftValuePos}"
         y="12.5"
         data-testid="${id}"
-      >${kValue}${unitSymbol ? ` ${unitSymbol}` : ""}</text>
+      >${kValue}${unitSymbol ? ` ${unitSymbol}` : ''}</text>
     </g>
-  `;
-};
+  `
+}
 
 /**
  * Calculates progress along the boundary of the circle, i.e. its circumference.
@@ -122,18 +120,18 @@ const createTextNode = ({
  * @returns {number} Progress value.
  */
 const calculateCircleProgress = (value) => {
-  const radius = 40;
-  const c = Math.PI * (radius * 2);
+  const radius = 40
+  const c = Math.PI * (radius * 2)
 
   if (value < 0) {
-    value = 0;
+    value = 0
   }
   if (value > 100) {
-    value = 100;
+    value = 100
   }
 
-  return ((100 - value) / 100) * c;
-};
+  return ((100 - value) / 100) * c
+}
 
 /**
  * Retrieves the animation to display progress along the circumference of circle
@@ -152,8 +150,8 @@ const getProgressAnimation = ({ progress }) => {
         stroke-dashoffset: ${calculateCircleProgress(progress)};
       }
     }
-  `;
-};
+  `
+}
 
 /**
  * Retrieves CSS styles for a card.
@@ -203,7 +201,7 @@ const getStyles = ({
     .bold { font-weight: 700 }
     .icon {
       fill: ${iconColor};
-      display: ${show_icons ? "block" : "none"};
+      display: ${show_icons ? 'block' : 'none'};
     }
 
     .rank-circle-rim {
@@ -224,8 +222,8 @@ const getStyles = ({
       animation: rankAnimation 1s forwards ease-in-out;
     }
     ${getProgressAnimation({ progress })}
-  `;
-};
+  `
+}
 
 /**
  * Return the label for commits according to the selected options
@@ -237,10 +235,10 @@ const getStyles = ({
  */
 const getTotalCommitsYearLabel = (include_all_commits, commits_year, i18n) =>
   include_all_commits
-    ? ""
+    ? ''
     : commits_year
       ? ` (${commits_year})`
-      : ` (${i18n.t("wakatimecard.lastyear")})`;
+      : ` (${i18n.t('wakatimecard.lastyear')})`
 
 /**
  * @typedef {import('../fetchers/types').StatsData} StatsData
@@ -268,7 +266,7 @@ const renderStatsCard = (stats, options = {}) => {
     totalDiscussionsAnswered,
     contributedTo,
     rank,
-  } = stats;
+  } = stats
   const {
     hide = [],
     show_icons = false,
@@ -285,139 +283,138 @@ const renderStatsCard = (stats, options = {}) => {
     text_color,
     text_bold = true,
     bg_color,
-    theme = "default",
+    theme = 'default',
     custom_title,
     border_radius,
     border_color,
-    number_format = "short",
+    number_format = 'short',
     number_precision,
     locale,
     disable_animations = false,
-    rank_icon = "default",
+    rank_icon = 'default',
     show = [],
-  } = options;
+  } = options
 
-  const lheight = parseInt(String(line_height), 10);
+  const lheight = parseInt(String(line_height), 10)
 
   // returns theme based colors with proper overrides and defaults
-  const { titleColor, iconColor, textColor, bgColor, borderColor, ringColor } =
-    getCardColors({
-      title_color,
-      text_color,
-      icon_color,
-      bg_color,
-      border_color,
-      ring_color,
-      theme,
-    });
+  const { titleColor, iconColor, textColor, bgColor, borderColor, ringColor } = getCardColors({
+    title_color,
+    text_color,
+    icon_color,
+    bg_color,
+    border_color,
+    ring_color,
+    theme,
+  })
 
-  const apostrophe = /s$/i.test(name.trim()) ? "" : "s";
+  const apostrophe = /s$/i.test(name.trim()) ? '' : 's'
   const i18n = new I18n({
     locale,
     translations: {
       ...statCardLocales({ name, apostrophe }),
       ...wakatimeCardLocales,
     },
-  });
+  })
 
   // Meta data for creating text nodes with createTextNode function
-  const STATS = {};
+  const STATS = {}
 
   STATS.stars = {
     icon: icons.star,
-    label: i18n.t("statcard.totalstars"),
+    label: i18n.t('statcard.totalstars'),
     value: totalStars,
-    id: "stars",
-  };
+    id: 'stars',
+  }
   STATS.commits = {
     icon: icons.commits,
-    label: `${i18n.t("statcard.commits")}${getTotalCommitsYearLabel(
+    label: `${i18n.t('statcard.commits')}${getTotalCommitsYearLabel(
       include_all_commits,
       commits_year,
       i18n,
     )}`,
     value: totalCommits,
-    id: "commits",
-  };
+    id: 'commits',
+  }
   STATS.prs = {
     icon: icons.prs,
-    label: i18n.t("statcard.prs"),
+    label: i18n.t('statcard.prs'),
     value: totalPRs,
-    id: "prs",
-  };
-
-  if (show.includes("prs_merged")) {
-    STATS.prs_merged = {
-      icon: icons.prs_merged,
-      label: i18n.t("statcard.prs-merged"),
-      value: totalPRsMerged,
-      id: "prs_merged",
-    };
+    id: 'prs',
   }
 
-  if (show.includes("prs_merged_percentage")) {
+  if (show.includes('prs_merged')) {
+    STATS.prs_merged = {
+      icon: icons.prs_merged,
+      label: i18n.t('statcard.prs-merged'),
+      value: totalPRsMerged,
+      id: 'prs_merged',
+    }
+  }
+
+  if (show.includes('prs_merged_percentage')) {
     STATS.prs_merged_percentage = {
       icon: icons.prs_merged_percentage,
-      label: i18n.t("statcard.prs-merged-percentage"),
+      label: i18n.t('statcard.prs-merged-percentage'),
       value: mergedPRsPercentage.toFixed(
-        typeof number_precision === "number" && !isNaN(number_precision)
+        typeof number_precision === 'number' && !isNaN(number_precision)
           ? clampValue(number_precision, 0, 2)
           : 2,
       ),
-      id: "prs_merged_percentage",
-      unitSymbol: "%",
-    };
+      id: 'prs_merged_percentage',
+      unitSymbol: '%',
+    }
   }
 
-  if (show.includes("reviews")) {
+  if (show.includes('reviews')) {
     STATS.reviews = {
       icon: icons.reviews,
-      label: i18n.t("statcard.reviews"),
+      label: i18n.t('statcard.reviews'),
       value: totalReviews,
-      id: "reviews",
-    };
+      id: 'reviews',
+    }
   }
 
   STATS.issues = {
     icon: icons.issues,
-    label: i18n.t("statcard.issues"),
+    label: i18n.t('statcard.issues'),
     value: totalIssues,
-    id: "issues",
-  };
+    id: 'issues',
+  }
 
-  if (show.includes("discussions_started")) {
+  if (show.includes('discussions_started')) {
     STATS.discussions_started = {
       icon: icons.discussions_started,
-      label: i18n.t("statcard.discussions-started"),
+      label: i18n.t('statcard.discussions-started'),
       value: totalDiscussionsStarted,
-      id: "discussions_started",
-    };
+      id: 'discussions_started',
+    }
   }
-  if (show.includes("discussions_answered")) {
+  if (show.includes('discussions_answered')) {
     STATS.discussions_answered = {
       icon: icons.discussions_answered,
-      label: i18n.t("statcard.discussions-answered"),
+      label: i18n.t('statcard.discussions-answered'),
       value: totalDiscussionsAnswered,
-      id: "discussions_answered",
-    };
+      id: 'discussions_answered',
+    }
   }
 
   STATS.contribs = {
     icon: icons.contribs,
-    label: i18n.t("statcard.contribs"),
+    label: i18n.t('statcard.contribs'),
     value: contributedTo,
-    id: "contribs",
-  };
+    id: 'contribs',
+  }
 
   // @ts-ignore
-  const isLongLocale = locale ? LONG_LOCALES.includes(locale) : false;
+  const isLongLocale = locale ? LONG_LOCALES.includes(locale) : false
 
   // filter out hidden stats defined by user & create the text nodes
   const statItems = Object.keys(STATS)
     .filter((key) => !hide.includes(key))
     .map((key, index) => {
       // @ts-ignore
-      const stats = STATS[key];
+      const stats = STATS[key]
 
       // create the text nodes, and pass index so that we can calculate the line spacing
       return createTextNode({
@@ -432,14 +429,11 @@ const renderStatsCard = (stats, options = {}) => {
         bold: text_bold,
         numberFormat: number_format,
         numberPrecision: number_precision,
-      });
-    });
+      })
+    })
 
   if (statItems.length === 0 && hide_rank) {
-    throw new CustomError(
-      "Could not render stats card.",
-      "Either stats or rank are required.",
-    );
+    throw new CustomError('Could not render stats card.', 'Either stats or rank are required.')
   }
 
   // Calculate the card height depending on how many items there are
@@ -447,10 +441,10 @@ const renderStatsCard = (stats, options = {}) => {
   let height = Math.max(
     45 + (statItems.length + 1) * lheight,
     hide_rank ? 0 : statItems.length ? 150 : 180,
-  );
+  )
 
   // the lower the user's percentile the better
-  const progress = 100 - rank.percentile;
+  const progress = 100 - rank.percentile
   const cssStyles = getStyles({
     titleColor,
     ringColor,
@@ -458,54 +452,44 @@ const renderStatsCard = (stats, options = {}) => {
     iconColor,
     show_icons,
     progress,
-  });
+  })
 
   const calculateTextWidth = () => {
     return measureText(
       custom_title
         ? custom_title
         : statItems.length
-          ? i18n.t("statcard.title")
-          : i18n.t("statcard.ranktitle"),
-    );
-  };
+          ? i18n.t('statcard.title')
+          : i18n.t('statcard.ranktitle'),
+    )
+  }
 
   /*
     When hide_rank=true, the minimum card width is 270 px + the title length and padding.
     When hide_rank=false, the minimum card_width is 340 px + the icon width (if show_icons=true).
     Numbers are picked by looking at existing dimensions on production.
   */
-  const iconWidth = show_icons && statItems.length ? 16 + /* padding */ 1 : 0;
+  const iconWidth = show_icons && statItems.length ? 16 + /* padding */ 1 : 0
   const minCardWidth =
     (hide_rank
-      ? clampValue(
-          50 /* padding */ + calculateTextWidth() * 2,
-          CARD_MIN_WIDTH,
-          Infinity,
-        )
+      ? clampValue(50 /* padding */ + calculateTextWidth() * 2, CARD_MIN_WIDTH, Infinity)
       : statItems.length
         ? RANK_CARD_MIN_WIDTH
-        : RANK_ONLY_CARD_MIN_WIDTH) + iconWidth;
+        : RANK_ONLY_CARD_MIN_WIDTH) + iconWidth
   const defaultCardWidth =
     (hide_rank
       ? CARD_DEFAULT_WIDTH
       : statItems.length
         ? RANK_CARD_DEFAULT_WIDTH
-        : RANK_ONLY_CARD_DEFAULT_WIDTH) + iconWidth;
-  let width = card_width
-    ? isNaN(card_width)
-      ? defaultCardWidth
-      : card_width
-    : defaultCardWidth;
+        : RANK_ONLY_CARD_DEFAULT_WIDTH) + iconWidth
+  let width = card_width ? (isNaN(card_width) ? defaultCardWidth : card_width) : defaultCardWidth
   if (width < minCardWidth) {
-    width = minCardWidth;
+    width = minCardWidth
   }
 
   const card = new Card({
     customTitle: custom_title,
-    defaultTitle: statItems.length
-      ? i18n.t("statcard.title")
-      : i18n.t("statcard.ranktitle"),
+    defaultTitle: statItems.length ? i18n.t('statcard.title') : i18n.t('statcard.ranktitle'),
     width,
     height,
     border_radius,
@@ -516,14 +500,14 @@ const renderStatsCard = (stats, options = {}) => {
       bgColor,
       borderColor,
     },
-  });
+  })
 
-  card.setHideBorder(hide_border);
-  card.setHideTitle(hide_title);
-  card.setCSS(cssStyles);
+  card.setHideBorder(hide_border)
+  card.setHideTitle(hide_title)
+  card.setCSS(cssStyles)
 
   if (disable_animations) {
-    card.disableAnimations();
+    card.disableAnimations()
   }
 
   /**
@@ -538,53 +522,51 @@ const renderStatsCard = (stats, options = {}) => {
    */
   const calculateRankXTranslation = () => {
     if (statItems.length) {
-      const minXTranslation = RANK_CARD_MIN_WIDTH + iconWidth - 70;
+      const minXTranslation = RANK_CARD_MIN_WIDTH + iconWidth - 70
       if (width > RANK_CARD_DEFAULT_WIDTH) {
-        const xMaxExpansion = minXTranslation + (450 - minCardWidth) / 2;
-        return xMaxExpansion + width - RANK_CARD_DEFAULT_WIDTH;
+        const xMaxExpansion = minXTranslation + (450 - minCardWidth) / 2
+        return xMaxExpansion + width - RANK_CARD_DEFAULT_WIDTH
       } else {
-        return minXTranslation + (width - minCardWidth) / 2;
+        return minXTranslation + (width - minCardWidth) / 2
       }
     } else {
-      return width / 2 + 20 - 10;
+      return width / 2 + 20 - 10
     }
-  };
+  }
 
   // Conditionally rendered elements
   const rankCircle = hide_rank
-    ? ""
+    ? ''
     : `<g data-testid="rank-circle"
-          transform="translate(${calculateRankXTranslation()}, ${
-            height / 2 - 50
-          })">
+          transform="translate(${calculateRankXTranslation()}, ${height / 2 - 50})">
         <circle class="rank-circle-rim" cx="-10" cy="8" r="40" />
         <circle class="rank-circle" cx="-10" cy="8" r="40" />
         <g class="rank-text">
           ${rankIcon(rank_icon, rank?.level, rank?.percentile)}
         </g>
-      </g>`;
+      </g>`
 
   // Accessibility Labels
   const labels = Object.keys(STATS)
     .filter((key) => !hide.includes(key))
     .map((key) => {
       // @ts-ignore
-      const stats = STATS[key];
-      if (key === "commits") {
-        return `${i18n.t("statcard.commits")} ${getTotalCommitsYearLabel(
+      const stats = STATS[key]
+      if (key === 'commits') {
+        return `${i18n.t('statcard.commits')} ${getTotalCommitsYearLabel(
           include_all_commits,
           commits_year,
           i18n,
-        )} : ${stats.value}`;
+        )} : ${stats.value}`
       }
-      return `${stats.label}: ${stats.value}`;
+      return `${stats.label}: ${stats.value}`
     })
-    .join(", ");
+    .join(', ')
 
   card.setAccessibilityLabel({
     title: `${card.title}, Rank: ${rank.level}`,
     desc: labels,
-  });
+  })
 
   return card.render(`
     ${rankCircle}
@@ -592,11 +574,11 @@ const renderStatsCard = (stats, options = {}) => {
       ${flexLayout({
         items: statItems,
         gap: lheight,
-        direction: "column",
-      }).join("")}
+        direction: 'column',
+      }).join('')}
     </svg>
-  `);
-};
+  `)
+}
 
-export { renderStatsCard };
-export default renderStatsCard;
+export { renderStatsCard }
+export default renderStatsCard
