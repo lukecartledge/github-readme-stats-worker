@@ -1,6 +1,6 @@
 // @ts-check
 
-const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql";
+const GITHUB_GRAPHQL_URL = 'https://api.github.com/graphql'
 
 /**
  * Send GraphQL request to GitHub API.
@@ -11,20 +11,20 @@ const GITHUB_GRAPHQL_URL = "https://api.github.com/graphql";
  */
 const request = async (data, headers) => {
   const response = await fetch(GITHUB_GRAPHQL_URL, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "github-readme-stats-worker",
+      'Content-Type': 'application/json',
+      'User-Agent': 'github-readme-stats-worker',
       ...headers,
     },
     body: JSON.stringify(data),
-  });
+  })
 
-  let parsedBody = null;
+  let parsedBody = null
   try {
-    parsedBody = await response.json();
+    parsedBody = await response.json()
   } catch {
-    parsedBody = null;
+    parsedBody = null
   }
 
   return {
@@ -32,7 +32,7 @@ const request = async (data, headers) => {
     status: response.status,
     statusText: response.statusText,
     headers: response.headers,
-  };
-};
+  }
+}
 
-export { request };
+export { request }

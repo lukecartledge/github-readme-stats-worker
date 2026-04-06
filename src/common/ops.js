@@ -1,6 +1,6 @@
 // @ts-check
 
-import toEmoji from "emoji-name-map";
+import toEmoji from 'emoji-name-map'
 
 /**
  * Returns boolean if value is either "true" or "false" else the value as it is.
@@ -9,19 +9,19 @@ import toEmoji from "emoji-name-map";
  * @returns {boolean | undefined } The parsed value.
  */
 const parseBoolean = (value) => {
-  if (typeof value === "boolean") {
-    return value;
+  if (typeof value === 'boolean') {
+    return value
   }
 
-  if (typeof value === "string") {
-    if (value.toLowerCase() === "true") {
-      return true;
-    } else if (value.toLowerCase() === "false") {
-      return false;
+  if (typeof value === 'string') {
+    if (value.toLowerCase() === 'true') {
+      return true
+    } else if (value.toLowerCase() === 'false') {
+      return false
     }
   }
-  return undefined;
-};
+  return undefined
+}
 
 /**
  * Parse string to array of strings.
@@ -31,10 +31,10 @@ const parseBoolean = (value) => {
  */
 const parseArray = (str) => {
   if (!str) {
-    return [];
+    return []
   }
-  return str.split(",");
-};
+  return str.split(',')
+}
 
 /**
  * Clamp the given number between the given range.
@@ -47,10 +47,10 @@ const parseArray = (str) => {
 const clampValue = (number, min, max) => {
   // @ts-ignore
   if (Number.isNaN(parseInt(number, 10))) {
-    return min;
+    return min
   }
-  return Math.max(min, Math.min(number, max));
-};
+  return Math.max(min, Math.min(number, max))
+}
 
 /**
  * Lowercase and trim string.
@@ -58,7 +58,7 @@ const clampValue = (number, min, max) => {
  * @param {string} name String to lowercase and trim.
  * @returns {string} Lowercased and trimmed string.
  */
-const lowercaseTrim = (name) => name.toLowerCase().trim();
+const lowercaseTrim = (name) => name.toLowerCase().trim()
 
 /**
  * Split array of languages in two columns.
@@ -70,19 +70,19 @@ const lowercaseTrim = (name) => name.toLowerCase().trim();
  */
 const chunkArray = (arr, perChunk) => {
   return arr.reduce((resultArray, item, index) => {
-    const chunkIndex = Math.floor(index / perChunk);
+    const chunkIndex = Math.floor(index / perChunk)
 
     if (!resultArray[chunkIndex]) {
       // @ts-ignore
-      resultArray[chunkIndex] = []; // start a new chunk
+      resultArray[chunkIndex] = [] // start a new chunk
     }
 
     // @ts-ignore
-    resultArray[chunkIndex].push(item);
+    resultArray[chunkIndex].push(item)
 
-    return resultArray;
-  }, []);
-};
+    return resultArray
+  }, [])
+}
 
 /**
  * Parse emoji from string.
@@ -92,12 +92,12 @@ const chunkArray = (arr, perChunk) => {
  */
 const parseEmojis = (str) => {
   if (!str) {
-    throw new Error("[parseEmoji]: str argument not provided");
+    throw new Error('[parseEmoji]: str argument not provided')
   }
   return str.replace(/:\w+:/gm, (emoji) => {
-    return toEmoji.get(emoji) || "";
-  });
-};
+    return toEmoji.get(emoji) || ''
+  })
+}
 
 /**
  * Get diff in minutes between two dates.
@@ -107,18 +107,10 @@ const parseEmojis = (str) => {
  * @returns {number} Number of minutes between the two dates.
  */
 const dateDiff = (d1, d2) => {
-  const date1 = new Date(d1);
-  const date2 = new Date(d2);
-  const diff = date1.getTime() - date2.getTime();
-  return Math.round(diff / (1000 * 60));
-};
+  const date1 = new Date(d1)
+  const date2 = new Date(d2)
+  const diff = date1.getTime() - date2.getTime()
+  return Math.round(diff / (1000 * 60))
+}
 
-export {
-  parseBoolean,
-  parseArray,
-  clampValue,
-  lowercaseTrim,
-  chunkArray,
-  parseEmojis,
-  dateDiff,
-};
+export { parseBoolean, parseArray, clampValue, lowercaseTrim, chunkArray, parseEmojis, dateDiff }

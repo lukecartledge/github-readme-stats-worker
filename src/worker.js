@@ -1,31 +1,28 @@
-import { renderStatsCard } from "./cards/stats.js";
-import { renderTopLanguages } from "./cards/top-languages.js";
-import { guardAccess } from "./common/access.js";
+import { renderStatsCard } from './cards/stats.js'
+import { renderTopLanguages } from './cards/top-languages.js'
+import { guardAccess } from './common/access.js'
 import {
   CACHE_TTL,
   resolveCacheSeconds,
   setCacheHeaders,
   setErrorCacheHeaders,
-} from "./common/cache.js";
-import {
-  MissingParamError,
-  retrieveSecondaryMessage,
-} from "./common/error.js";
-import { parseArray, parseBoolean } from "./common/ops.js";
-import { renderError } from "./common/render.js";
-import { fetchStats } from "./fetchers/stats.js";
-import { fetchTopLanguages } from "./fetchers/top-languages.js";
-import { isLocaleAvailable } from "./translations.js";
+} from './common/cache.js'
+import { MissingParamError, retrieveSecondaryMessage } from './common/error.js'
+import { parseArray, parseBoolean } from './common/ops.js'
+import { renderError } from './common/render.js'
+import { fetchStats } from './fetchers/stats.js'
+import { fetchTopLanguages } from './fetchers/top-languages.js'
+import { isLocaleAvailable } from './translations.js'
 
-const SVG_CONTENT_TYPE = "image/svg+xml";
+const SVG_CONTENT_TYPE = 'image/svg+xml'
 
 const getResponse = (svg, cacheHeaders, status = 200) => {
   const headers = new Headers({
-    "Content-Type": SVG_CONTENT_TYPE,
+    'Content-Type': SVG_CONTENT_TYPE,
     ...cacheHeaders,
-  });
-  return new Response(svg, { status, headers });
-};
+  })
+  return new Response(svg, { status, headers })
+}
 
 const getBaseColorOptions = (params) => ({
   title_color: params.title_color,
@@ -33,56 +30,55 @@ const getBaseColorOptions = (params) => ({
   bg_color: params.bg_color,
   border_color: params.border_color,
   theme: params.theme,
-});
+})
 
 const handleStatsRoute = async (url, env) => {
-  const params = Object.fromEntries(url.searchParams.entries());
-  const colors = getBaseColorOptions(params);
+  const params = Object.fromEntries(url.searchParams.entries())
+  const colors = getBaseColorOptions(params)
 
   const access = guardAccess({
     res: { send: (value) => value },
     id: params.username,
-    type: "username",
+    type: 'username',
     env,
     colors,
-  });
+  })
 
   if (!access.isPassed) {
-    return getResponse(access.result, setErrorCacheHeaders(), 200);
+    return getResponse(access.result, setErrorCacheHeaders(), 200)
   }
 
   if (params.locale && !isLocaleAvailable(params.locale)) {
     return getResponse(
       renderError({
-        message: "Something went wrong",
-        secondaryMessage: "Language not found",
+        message: 'Something went wrong',
+        secondaryMessage: 'Language not found',
         renderOptions: colors,
       }),
       setErrorCacheHeaders(),
       200,
-    );
+    )
   }
 
   try {
-    const showStats = parseArray(params.show);
+    const showStats = parseArray(params.show)
     const stats = await fetchStats(
       params.username,
       parseBoolean(params.include_all_commits),
       parseArray(params.exclude_repo),
-      showStats.includes("prs_merged") ||
-        showStats.includes("prs_merged_percentage"),
-      showStats.includes("discussions_started"),
-      showStats.includes("discussions_answered"),
+      showStats.includes('prs_merged') || showStats.includes('prs_merged_percentage'),
+      showStats.includes('discussions_started'),
+      showStats.includes('discussions_answered'),
       parseInt(params.commits_year, 10),
       env,
-    );
+    )
 
     const cacheSeconds = resolveCacheSeconds({
       requested: parseInt(params.cache_seconds, 10),
       def: CACHE_TTL.STATS_CARD.DEFAULT,
       min: CACHE_TTL.STATS_CARD.MIN,
       max: CACHE_TTL.STATS_CARD.MAX,
-    });
+    })
 
     const svg = renderStatsCard(stats, {
       hide: parseArray(params.hide),
@@ -110,13 +106,13 @@ const handleStatsRoute = async (url, env) => {
       disable_animations: parseBoolean(params.disable_animations),
       rank_icon: params.rank_icon,
       show: showStats,
-    });
+    })
 
-    return getResponse(svg, setCacheHeaders(cacheSeconds), 200);
+    return getResponse(svg, setCacheHeaders(cacheSeconds), 200)
   } catch (err) {
-    const isError = err instanceof Error;
-    const message = isError ? err.message : "An unknown error occurred";
-    const secondaryMessage = isError ? retrieveSecondaryMessage(err) : undefined;
+    const isError = err instanceof Error
+    const message = isError ? err.message : 'An unknown error occurred'
+    const secondaryMessage = isError ? retrieveSecondaryMessage(err) : undefined
 
     return getResponse(
       renderError({
@@ -129,74 +125,68 @@ const handleStatsRoute = async (url, env) => {
       }),
       setErrorCacheHeaders(),
       200,
-    );
+    )
   }
-};
+}
 
 const handleTopLanguagesRoute = async (url, env) => {
-  const params = Object.fromEntries(url.searchParams.entries());
-  const colors = getBaseColorOptions(params);
+  const params = Object.fromEntries(url.searchParams.entries())
+  const colors = getBaseColorOptions(params)
 
   const access = guardAccess({
     res: { send: (value) => value },
     id: params.username,
-    type: "username",
+    type: 'username',
     env,
     colors,
-  });
+  })
 
   if (!access.isPassed) {
-    return getResponse(access.result, setErrorCacheHeaders(), 200);
+    return getResponse(access.result, setErrorCacheHeaders(), 200)
   }
 
   if (params.locale && !isLocaleAvailable(params.locale)) {
     return getResponse(
       renderError({
-        message: "Something went wrong",
-        secondaryMessage: "Locale not found",
+        message: 'Something went wrong',
+        secondaryMessage: 'Locale not found',
         renderOptions: colors,
       }),
       setErrorCacheHeaders(),
       200,
-    );
+    )
   }
 
   if (
     params.layout !== undefined &&
-    (typeof params.layout !== "string" ||
-      ![
-        "compact",
-        "normal",
-        "donut",
-        "donut-vertical",
-        "pie",
-      ].includes(params.layout))
+    (typeof params.layout !== 'string' ||
+      !['compact', 'normal', 'donut', 'donut-vertical', 'pie'].includes(params.layout))
   ) {
     return getResponse(
       renderError({
-        message: "Something went wrong",
-        secondaryMessage: "Incorrect layout input",
+        message: 'Something went wrong',
+        secondaryMessage: 'Incorrect layout input',
         renderOptions: colors,
       }),
       setErrorCacheHeaders(),
       200,
-    );
+    )
   }
 
   if (
     params.stats_format !== undefined &&
-    (typeof params.stats_format !== "string" ||
-      !["bytes", "percentages"].includes(params.stats_format))
+    (typeof params.stats_format !== 'string' ||
+      !['bytes', 'percentages'].includes(params.stats_format))
   ) {
     return getResponse(
       renderError({
-        message: "Something went wrong",
-        secondaryMessage: "Incorrect stats_format input",
+        message: 'Something went wrong',
+        secondaryMessage: 'Incorrect stats_format input',
         renderOptions: colors,
       }),
       setErrorCacheHeaders(),
       200,
-    );
+    )
   }
 
   try {
@@ -206,14 +196,14 @@ const handleTopLanguagesRoute = async (url, env) => {
       params.size_weight,
       params.count_weight,
       env,
-    );
+    )
 
     const cacheSeconds = resolveCacheSeconds({
       requested: parseInt(params.cache_seconds, 10),
       def: CACHE_TTL.TOP_LANGS_CARD.DEFAULT,
       min: CACHE_TTL.TOP_LANGS_CARD.MIN,
       max: CACHE_TTL.TOP_LANGS_CARD.MAX,
-    });
+    })
 
     const svg = renderTopLanguages(topLangs, {
       custom_title: params.custom_title,
@@ -233,13 +223,13 @@ const handleTopLanguagesRoute = async (url, env) => {
       disable_animations: parseBoolean(params.disable_animations),
       hide_progress: parseBoolean(params.hide_progress),
       stats_format: params.stats_format,
-    });
+    })
 
-    return getResponse(svg, setCacheHeaders(cacheSeconds), 200);
+    return getResponse(svg, setCacheHeaders(cacheSeconds), 200)
   } catch (err) {
-    const isError = err instanceof Error;
-    const message = isError ? err.message : "An unknown error occurred";
-    const secondaryMessage = isError ? retrieveSecondaryMessage(err) : undefined;
+    const isError = err instanceof Error
+    const message = isError ? err.message : 'An unknown error occurred'
+    const secondaryMessage = isError ? retrieveSecondaryMessage(err) : undefined
 
     return getResponse(
       renderError({
@@ -252,25 +242,25 @@ const handleTopLanguagesRoute = async (url, env) => {
       }),
       setErrorCacheHeaders(),
       200,
-    );
+    )
   }
-};
+}
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
+    const url = new URL(request.url)
 
-    if (url.pathname === "/api") {
-      return handleStatsRoute(url, env);
+    if (url.pathname === '/api') {
+      return handleStatsRoute(url, env)
     }
 
-    if (url.pathname === "/api/top-langs") {
-      return handleTopLanguagesRoute(url, env);
+    if (url.pathname === '/api/top-langs') {
+      return handleTopLanguagesRoute(url, env)
     }
 
-    return new Response("Not Found", {
+    return new Response('Not Found', {
       status: 404,
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
-    });
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    })
   },
-};
+}

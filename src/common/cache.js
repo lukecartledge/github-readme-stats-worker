@@ -1,10 +1,10 @@
 // @ts-check
 
-import { clampValue } from "./ops.js";
+import { clampValue } from './ops.js'
 
-const MIN = 60;
-const HOUR = 60 * MIN;
-const DAY = 24 * HOUR;
+const MIN = 60
+const HOUR = 60 * MIN
+const DAY = 24 * HOUR
 
 /**
  * Common durations in seconds.
@@ -26,7 +26,7 @@ const DURATIONS = {
   TWO_DAY: 2 * DAY,
   SIX_DAY: 6 * DAY,
   TEN_DAY: 10 * DAY,
-};
+}
 
 /**
  * Common cache TTL values in seconds.
@@ -58,7 +58,7 @@ const CACHE_TTL = {
     MAX: DURATIONS.TWO_DAY,
   },
   ERROR: DURATIONS.TEN_MINUTES,
-};
+}
 
 /**
  * Resolves the cache seconds based on the requested, default, min, and max values.
@@ -71,8 +71,8 @@ const CACHE_TTL = {
  * @returns {number} The resolved cache seconds.
  */
 const resolveCacheSeconds = ({ requested, def, min, max }) => {
-  return clampValue(isNaN(requested) ? def : requested, min, max);
-};
+  return clampValue(isNaN(requested) ? def : requested, min, max)
+}
 
 /**
  * Disables caching by setting appropriate headers on the response object.
@@ -81,11 +81,11 @@ const resolveCacheSeconds = ({ requested, def, min, max }) => {
  */
 const disableCaching = () => {
   return {
-    "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0, s-maxage=0",
-    Pragma: "no-cache",
-    Expires: "0",
-  };
-};
+    'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, s-maxage=0',
+    Pragma: 'no-cache',
+    Expires: '0',
+  }
+}
 
 /**
  * Sets the Cache-Control headers on the response object.
@@ -95,16 +95,16 @@ const disableCaching = () => {
  */
 const setCacheHeaders = (cacheSeconds) => {
   if (cacheSeconds < 1) {
-    return disableCaching();
+    return disableCaching()
   }
 
   return {
-    "Cache-Control":
+    'Cache-Control':
       `max-age=${cacheSeconds}, ` +
       `s-maxage=${cacheSeconds}, ` +
       `stale-while-revalidate=${DURATIONS.ONE_DAY}`,
-  };
-};
+  }
+}
 
 /**
  * Sets the Cache-Control headers for error responses on the response object.
@@ -113,17 +113,11 @@ const setCacheHeaders = (cacheSeconds) => {
  */
 const setErrorCacheHeaders = () => {
   return {
-    "Cache-Control":
+    'Cache-Control':
       `max-age=${CACHE_TTL.ERROR}, ` +
       `s-maxage=${CACHE_TTL.ERROR}, ` +
       `stale-while-revalidate=${DURATIONS.ONE_DAY}`,
-  };
-};
+  }
+}
 
-export {
-  resolveCacheSeconds,
-  setCacheHeaders,
-  setErrorCacheHeaders,
-  DURATIONS,
-  CACHE_TTL,
-};
+export { resolveCacheSeconds, setCacheHeaders, setErrorCacheHeaders, DURATIONS, CACHE_TTL }
