@@ -197,11 +197,7 @@ describe('fetchStreak', () => {
     const todayStr = new Date().toISOString().split('T')[0]
 
     retryer.mockResolvedValueOnce(makeMetadataResponse([currentYear]))
-    retryer.mockResolvedValueOnce(
-      makeYearResponse([
-        [todayStr, 5],
-      ]),
-    )
+    retryer.mockResolvedValueOnce(makeYearResponse([[todayStr, 5]]))
 
     await fetchStreak('testuser', { GH_PAT_1: 'token' })
 
