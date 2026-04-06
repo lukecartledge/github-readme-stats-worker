@@ -29,8 +29,6 @@ describe('renderStreakCard', () => {
     expect(svg).toContain('Longest Streak')
     expect(svg).toContain('1245')
     expect(svg).toContain('46')
-    expect(svg).toContain('class="ring"')
-    expect(svg).toContain('class="fire"')
   })
 
   it('supports theme and color overrides', () => {

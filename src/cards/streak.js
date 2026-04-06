@@ -4,9 +4,6 @@ import { Card } from '../common/Card.js'
 import { getCardColors } from '../common/color.js'
 import { CustomError } from '../common/error.js'
 
-const FIRE_ICON_PATH =
-  'M8 1.2c.6 2.1-.5 3.3-1.5 4.3-.8.8-1.4 1.5-1.4 2.5 0 1.4 1.1 2.6 2.7 2.6 1.9 0 3-1.3 3-3.2 0-1.1-.4-2-.9-2.9 2 .8 3.3 2.7 3.3 5 0 3.1-2.4 5.5-5.4 5.5S2 12.6 2 9.6c0-2.5 1.3-4.4 3.3-5.4-.2.5-.3 1-.3 1.6 0 .8.3 1.4.7 1.9.5-.9 1.2-1.5 1.8-2.2C8.2 4.7 9 3.7 8 1.2z'
-
 const DEFAULT_STREAK = {
   start: '',
   end: '',
@@ -29,7 +26,7 @@ const safeDateFormat = (date, locale) => {
   }
 }
 
-const getStyles = ({ titleColor, textColor, iconColor, ringColor }) => {
+const getStyles = ({ titleColor, textColor }) => {
   return `
     .title {
       font: 600 13px 'Segoe UI', Ubuntu, sans-serif;
@@ -52,25 +49,6 @@ const getStyles = ({ titleColor, textColor, iconColor, ringColor }) => {
       font: 400 11px 'Segoe UI', Ubuntu, sans-serif;
       fill: ${textColor};
       opacity: 0.7;
-    }
-    .fire-wrap {
-      transform-origin: center;
-      animation: firePulse 1400ms ease-in-out infinite;
-    }
-    .fire {
-      fill: ${iconColor};
-    }
-    .ring {
-      fill: none;
-      stroke: ${ringColor};
-      stroke-width: 2.5;
-      stroke-dasharray: 4 5;
-      opacity: 0.5;
-    }
-    @keyframes firePulse {
-      0% { transform: scale(1); opacity: 0.85; }
-      50% { transform: scale(1.08); opacity: 1; }
-      100% { transform: scale(1); opacity: 0.85; }
     }
     @keyframes numberPop {
       0% { transform: scale(0.96); opacity: 0.6; }
@@ -107,7 +85,7 @@ const renderStreakCard = (data, options = {}) => {
     disable_animations = false,
   } = options
 
-  const { titleColor, textColor, iconColor, bgColor, borderColor, ringColor } = getCardColors({
+  const { titleColor, textColor, iconColor, bgColor, borderColor } = getCardColors({
     title_color,
     text_color,
     bg_color,
@@ -143,8 +121,6 @@ const renderStreakCard = (data, options = {}) => {
     getStyles({
       titleColor,
       textColor,
-      iconColor,
-      ringColor,
     }),
   )
 
@@ -157,21 +133,6 @@ const renderStreakCard = (data, options = {}) => {
     desc: `Total contributions ${data.totalContributions}, current streak ${currentStreak.length} days, longest streak ${longestStreak.length} days`,
   })
 
-  const middleColumn = `
-    <g transform="translate(380, 0)">
-      <text class="title" text-anchor="middle" x="0" y="8">Current Streak</text>
-      <g class="fire-wrap" transform="translate(0, 27)">
-        <circle class="ring" cx="0" cy="0" r="16" />
-        <svg viewBox="0 0 16 16" x="-8" y="-8" width="16" height="16" aria-hidden="true">
-          <path class="fire" d="${FIRE_ICON_PATH}" />
-        </svg>
-      </g>
-      <text class="value" text-anchor="middle" x="0" y="78">${currentStreak.length}</text>
-      <text class="label" text-anchor="middle" x="0" y="98">days</text>
-      <text class="sub" text-anchor="middle" x="0" y="114">${currentDateRange}</text>
-    </g>
-  `
-
   return card.render(`
     <g transform="translate(0, 10)">
       ${renderColumn({
@@ -183,7 +144,13 @@ const renderStreakCard = (data, options = {}) => {
           : 'No contributions yet',
         subBottom: data.firstContribution ? 'all-time' : 'start coding today',
       })}
-      ${middleColumn}
+      ${renderColumn({
+        x: 380,
+        title: 'Current Streak',
+        value: currentStreak.length,
+        subTop: 'days',
+        subBottom: currentDateRange,
+      })}
       ${renderColumn({
         x: 615,
         title: 'Longest Streak',
