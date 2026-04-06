@@ -19,6 +19,7 @@ npm run test      # vitest
 - **SVG generation**: Pure string templates (no DOM, no canvas)
 - **HTTP**: Native `fetch()` (no axios)
 - **Caching**: Cache API (per-datacenter) + optional KV (global)
+- **Analytics**: Workers Analytics Engine (`ANALYTICS` binding → `github_readme_stats` dataset)
 - **Auth**: GitHub PATs via Workers secrets (`GH_PAT_1`, `GH_PAT_2`, ...)
 
 ## Conventions
@@ -55,6 +56,12 @@ Config (set in wrangler.toml `[vars]`):
 
 ```
 CACHE_MAX_AGE   # Cache TTL in seconds (default: 1800)
+```
+
+Bindings (set in wrangler.toml):
+
+```
+ANALYTICS   # Analytics Engine dataset (github_readme_stats)
 ```
 
 ## Routes
