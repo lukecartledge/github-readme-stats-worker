@@ -191,4 +191,29 @@ describe('fetchStreak', () => {
   it('keeps request import mockable for fetcher callback usage', () => {
     expect(request).toBeDefined()
   })
+
+  it('caps current year to today to avoid future zero-contribution days', async () => {
+    const currentYear = new Date().getUTCFullYear()
+    const todayStr = new Date().toISOString().split('T')[0]
+
+    retryer.mockResolvedValueOnce(makeMetadataResponse([currentYear]))
+    retryer.mockResolvedValueOnce(
+      makeYearResponse([
+        [todayStr, 5],
+      ]),
+    )
+
+    await fetchStreak('testuser', { GH_PAT_1: 'token' })
+
+    expect(retryer).toHaveBeenNthCalledWith(
+      2,
+      expect.any(Function),
+      {
+        login: 'testuser',
+        from: `${currentYear}-01-01T00:00:00Z`,
+        to: `${todayStr}T23:59:59Z`,
+      },
+      { GH_PAT_1: 'token' },
+    )
+  })
 })
