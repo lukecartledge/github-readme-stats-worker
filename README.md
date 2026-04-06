@@ -10,6 +10,10 @@ No cold starts. No shared rate limits. Your own GitHub stats on your own infrast
   <img src="docs/stats-card.svg" alt="GitHub Stats Card" width="450" />
   <br />
   <img src="docs/top-langs-card.svg" alt="Top Languages Card" width="350" />
+  <br />
+  <img src="docs/streak-card.svg" alt="Contribution Streak Card" width="450" />
+  <br />
+  <img src="docs/repo-pin-gotham.svg" alt="Repo Pin Card — gotham theme" width="350" />
 </p>
 
 <details>
@@ -19,6 +23,8 @@ No cold starts. No shared rate limits. Your own GitHub stats on your own infrast
   <img src="docs/stats-radical.svg" alt="Stats — radical theme" width="450" />
   <br />
   <img src="docs/top-langs-donut.svg" alt="Top Languages — donut layout" width="350" />
+  <br />
+  <img src="docs/streak-gotham.svg" alt="Streak — gotham theme" width="450" />
 </p>
 </details>
 
