@@ -32,10 +32,11 @@ npm run test      # vitest
 
 ```
 ├── src/
-│   ├── worker.js          # Entry point — fetch() handler, routing
-│   ├── common/            # Shared utilities (Card, retryer, icons, utils)
-│   ├── cards/             # SVG card renderers (stats, top-languages)
-│   └── fetchers/          # GitHub API data fetchers
+│   ├── worker.js          # Entry point — fetch() handler, routing, cache
+│   ├── common/            # Shared utilities (Card, retryer, icons, cache, utils)
+│   ├── cards/             # SVG card renderers (stats, top-languages, repo, streak)
+│   └── fetchers/          # GitHub API data fetchers (stats, top-languages, repo, streak)
+├── test/                  # Vitest unit tests (mirrors src/ structure)
 ├── themes/                # Card theme definitions
 ├── wrangler.toml          # Workers config
 ├── .dev.vars.example      # Template for local secrets
@@ -59,8 +60,11 @@ CACHE_MAX_AGE   # Cache TTL in seconds (default: 1800)
 ## Routes
 
 ```
-/api?username=X                → Stats card
-/api/top-langs?username=X      → Top languages card
+/health                              → JSON health check
+/api?username=X                      → Stats card
+/api/top-langs?username=X            → Top languages card
+/api/pin?username=X&repo=Y           → Repo pin card
+/api/streak?username=X               → Streak stats card
 ```
 
 ## Do Not

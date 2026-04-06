@@ -33,10 +33,13 @@ The public `github-readme-stats.vercel.app` instance is shared by thousands of u
 
 ## Routes
 
-| Route                       | Card                |
-| --------------------------- | ------------------- |
-| `/api?username=X`           | GitHub stats        |
-| `/api/top-langs?username=X` | Most used languages |
+| Route                            | Card                  |
+| -------------------------------- | --------------------- |
+| `/api?username=X`                | GitHub stats          |
+| `/api/top-langs?username=X`      | Most used languages   |
+| `/api/pin?username=X&repo=Y`     | Repo pin card         |
+| `/api/streak?username=X`         | Contribution streak   |
+| `/health`                        | JSON health check     |
 
 ## Quick start
 
@@ -93,6 +96,8 @@ npm run dev
 ```markdown
 ![GitHub Stats](https://YOUR_WORKER_URL/api?username=YOUR_USERNAME&theme=gotham&show_icons=true)
 ![Top Languages](https://YOUR_WORKER_URL/api/top-langs?username=YOUR_USERNAME&theme=gotham&layout=compact)
+![Streak Stats](https://YOUR_WORKER_URL/api/streak?username=YOUR_USERNAME&theme=gotham)
+[![Repo Card](https://YOUR_WORKER_URL/api/pin?username=YOUR_USERNAME&repo=YOUR_REPO&theme=gotham)](https://github.com/YOUR_USERNAME/YOUR_REPO)
 ```
 
 ## Stats card options
@@ -149,6 +154,41 @@ npm run dev
 | `stats_format`       | string  | `percentages` | Format: `bytes` or `percentages`                                    |
 | `cache_seconds`      | number  | `14400`       | Cache TTL in seconds (min 7200)                                     |
 
+## Repo pin card options
+
+| Parameter                  | Type    | Default      | Description                       |
+| -------------------------- | ------- | ------------ | --------------------------------- |
+| `username`                 | string  | **required** | GitHub username                   |
+| `repo`                     | string  | **required** | Repository name                   |
+| `theme`                    | string  | `default`    | Card theme (see [themes](#themes)) |
+| `show_owner`               | boolean | `false`      | Show the repo owner name          |
+| `hide_border`              | boolean | `false`      | Hide the card border              |
+| `locale`                   | string  | `en`         | Locale for card text              |
+| `description_lines_count`  | number  | `2`          | Max lines for description         |
+| `border_radius`            | number  | `4.5`        | Border radius in pixels           |
+| `border_color`             | string  | —            | Custom border color               |
+| `title_color`              | string  | —            | Custom title color                |
+| `text_color`               | string  | —            | Custom text color                 |
+| `icon_color`               | string  | —            | Custom icon color                 |
+| `bg_color`                 | string  | —            | Custom background color           |
+| `cache_seconds`            | number  | `14400`      | Cache TTL in seconds              |
+
+## Streak stats card options
+
+| Parameter            | Type    | Default      | Description                        |
+| -------------------- | ------- | ------------ | ---------------------------------- |
+| `username`           | string  | **required** | GitHub username                    |
+| `theme`              | string  | `default`    | Card theme (see [themes](#themes)) |
+| `hide_border`        | boolean | `false`      | Hide the card border               |
+| `locale`             | string  | `en`         | Locale for date formatting         |
+| `disable_animations` | boolean | `false`      | Disable all animations             |
+| `border_radius`      | number  | `4.5`        | Border radius in pixels            |
+| `border_color`       | string  | —            | Custom border color                |
+| `title_color`        | string  | —            | Custom title color                 |
+| `text_color`         | string  | —            | Custom text color                  |
+| `bg_color`           | string  | —            | Custom background color            |
+| `cache_seconds`      | number  | `14400`      | Cache TTL in seconds               |
+
 ## Themes
 
 62 themes available. A few popular ones:
@@ -176,21 +216,28 @@ npm run dev
 
 ```
 ├── src/
-│   ├── worker.js            # Entry point — fetch handler, routing
+│   ├── worker.js            # Entry point — fetch handler, routing, cache
 │   ├── common/              # Shared utilities (Card, retryer, icons, colors)
 │   │   ├── http.js          # Native fetch() wrapper for GitHub API
 │   │   ├── retryer.js       # PAT rotation and retry logic
-│   │   ├── cache.js         # Cache header utilities
+│   │   ├── cache.js         # Cache TTL constants and header utilities
 │   │   └── ...
 │   ├── cards/               # SVG card renderers
 │   │   ├── stats.js         # GitHub stats card
-│   │   └── top-languages.js # Top languages card
+│   │   ├── top-languages.js # Top languages card
+│   │   ├── repo.js          # Repo pin card
+│   │   └── streak.js        # Contribution streak card
 │   └── fetchers/            # GitHub API data fetchers
 │       ├── stats.js         # User stats via GraphQL
-│       └── top-languages.js # Language data via GraphQL
+│       ├── top-languages.js # Language data via GraphQL
+│       ├── repo.js          # Repository data via GraphQL
+│       └── streak.js        # Contribution history via GraphQL
+├── test/                    # Vitest unit tests (mirrors src/ structure)
 ├── themes/                  # 62 card theme definitions
 ├── .github/
-│   ├── workflows/deploy.yml # Auto-deploy on push to main
+│   ├── workflows/
+│   │   ├── deploy.yml       # Auto-deploy on push to main
+│   │   └── ci.yml           # Lint + tests on PRs
 │   └── dependabot.yml       # Weekly dependency updates
 ├── wrangler.toml            # Cloudflare Workers config
 └── AGENTS.md                # AI agent conventions
@@ -198,6 +245,7 @@ npm run dev
 
 ## CI/CD
 
+- **CI:** Every PR runs ESLint, Prettier format check, and 280+ vitest unit tests. Merge is blocked unless all checks pass.
 - **Auto-deploy:** Every merge to `main` triggers a Wrangler deploy via GitHub Actions.
 - **Dependabot:** Weekly PRs for npm dependency updates and GitHub Actions version bumps.
 - **Branch protection:** `main` requires a pull request (no direct pushes).
