@@ -64,13 +64,17 @@ const createRequest = (path) => new Request(`https://stats.example.com${path}`)
 
 const createCtx = () => ({ waitUntil: vi.fn() })
 
+const mockAnalytics = {
+  writeDataPoint: vi.fn(),
+}
+
 const mockCache = {
   match: vi.fn().mockResolvedValue(undefined),
   put: vi.fn().mockResolvedValue(undefined),
 }
 
 describe('Worker fetch handler', () => {
-  const env = { GH_PAT_1: 'test-token' }
+  const env = { GH_PAT_1: 'test-token', ANALYTICS: mockAnalytics }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -80,6 +84,7 @@ describe('Worker fetch handler', () => {
     fetchStreak.mockResolvedValue(mockStreakData)
     mockCache.match.mockResolvedValue(undefined)
     mockCache.put.mockResolvedValue(undefined)
+    mockAnalytics.writeDataPoint.mockClear()
     globalThis.caches = { default: mockCache }
   })
 
@@ -441,6 +446,84 @@ describe('Worker fetch handler', () => {
     it('skips cache for 404 routes', async () => {
       await worker.fetch(createRequest('/nonexistent'), env, createCtx())
       expect(mockCache.match).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Analytics Engine integration', () => {
+    it('writes analytics on cache miss with correct dimensions', async () => {
+      await worker.fetch(createRequest('/api?username=testuser&theme=gotham'), env, createCtx())
+      expect(mockAnalytics.writeDataPoint).toHaveBeenCalledTimes(1)
+      const call = mockAnalytics.writeDataPoint.mock.calls[0][0]
+      expect(call.blobs[0]).toBe('/api')
+      expect(call.blobs[1]).toBe('testuser')
+      expect(call.blobs[2]).toBe('gotham')
+      expect(call.blobs[3]).toBe('MISS')
+      expect(call.doubles).toHaveLength(1)
+      expect(call.doubles[0]).toBeTypeOf('number')
+      expect(call.indexes).toEqual(['/api'])
+    })
+
+    it('writes analytics on cache hit', async () => {
+      const cachedResponse = new Response('<svg>cached</svg>', {
+        headers: { 'Content-Type': 'image/svg+xml' },
+      })
+      mockCache.match.mockResolvedValue(cachedResponse)
+
+      await worker.fetch(createRequest('/api?username=testuser&theme=radical'), env, createCtx())
+      expect(mockAnalytics.writeDataPoint).toHaveBeenCalledTimes(1)
+      const call = mockAnalytics.writeDataPoint.mock.calls[0][0]
+      expect(call.blobs[0]).toBe('/api')
+      expect(call.blobs[1]).toBe('testuser')
+      expect(call.blobs[2]).toBe('radical')
+      expect(call.blobs[3]).toBe('HIT')
+      expect(call.indexes).toEqual(['/api'])
+    })
+
+    it('uses "default" for missing theme param', async () => {
+      await worker.fetch(createRequest('/api?username=testuser'), env, createCtx())
+      const call = mockAnalytics.writeDataPoint.mock.calls[0][0]
+      expect(call.blobs[2]).toBe('default')
+    })
+
+    it('uses empty string for missing username param', async () => {
+      await worker.fetch(createRequest('/api/top-langs'), env, createCtx())
+      const call = mockAnalytics.writeDataPoint.mock.calls[0][0]
+      expect(call.blobs[1]).toBe('')
+    })
+
+    it('does not write analytics for health endpoint', async () => {
+      await worker.fetch(createRequest('/health'), env, createCtx())
+      expect(mockAnalytics.writeDataPoint).not.toHaveBeenCalled()
+    })
+
+    it('does not write analytics for 404 routes', async () => {
+      await worker.fetch(createRequest('/nonexistent'), env, createCtx())
+      expect(mockAnalytics.writeDataPoint).not.toHaveBeenCalled()
+    })
+
+    it('does not throw when ANALYTICS binding is missing', async () => {
+      const envWithoutAnalytics = { GH_PAT_1: 'test-token' }
+      const response = await worker.fetch(
+        createRequest('/api?username=testuser'),
+        envWithoutAnalytics,
+        createCtx(),
+      )
+      expect(response.status).toBe(200)
+      expect(mockAnalytics.writeDataPoint).not.toHaveBeenCalled()
+    })
+
+    it('writes analytics for all card routes', async () => {
+      const routes = [
+        '/api?username=testuser',
+        '/api/top-langs?username=testuser',
+        '/api/pin?username=testuser&repo=test-repo',
+        '/api/streak?username=testuser',
+      ]
+      for (const route of routes) {
+        mockAnalytics.writeDataPoint.mockClear()
+        await worker.fetch(createRequest(route), env, createCtx())
+        expect(mockAnalytics.writeDataPoint).toHaveBeenCalledTimes(1)
+      }
     })
   })
 })
