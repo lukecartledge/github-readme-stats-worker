@@ -34,6 +34,13 @@ const mockTopLangs = {
 
 const createRequest = (path) => new Request(`https://stats.example.com${path}`)
 
+const createCtx = () => ({ waitUntil: vi.fn() })
+
+const mockCache = {
+  match: vi.fn().mockResolvedValue(undefined),
+  put: vi.fn().mockResolvedValue(undefined),
+}
+
 describe('Worker fetch handler', () => {
   const env = { GH_PAT_1: 'test-token' }
 
@@ -41,17 +48,20 @@ describe('Worker fetch handler', () => {
     vi.clearAllMocks()
     fetchStats.mockResolvedValue(mockStats)
     fetchTopLanguages.mockResolvedValue(mockTopLangs)
+    mockCache.match.mockResolvedValue(undefined)
+    mockCache.put.mockResolvedValue(undefined)
+    globalThis.caches = { default: mockCache }
   })
 
   describe('routing', () => {
     it('returns 404 for unknown paths', async () => {
-      const response = await worker.fetch(createRequest('/unknown'), env)
+      const response = await worker.fetch(createRequest('/unknown'), env, createCtx())
       expect(response.status).toBe(404)
       expect(await response.text()).toBe('Not Found')
     })
 
     it('routes /api to stats handler', async () => {
-      const response = await worker.fetch(createRequest('/api?username=testuser'), env)
+      const response = await worker.fetch(createRequest('/api?username=testuser'), env, createCtx())
       expect(response.status).toBe(200)
       expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
       const body = await response.text()
@@ -59,7 +69,11 @@ describe('Worker fetch handler', () => {
     })
 
     it('routes /api/top-langs to top languages handler', async () => {
-      const response = await worker.fetch(createRequest('/api/top-langs?username=testuser'), env)
+      const response = await worker.fetch(
+        createRequest('/api/top-langs?username=testuser'),
+        env,
+        createCtx(),
+      )
       expect(response.status).toBe(200)
       expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
       const body = await response.text()
@@ -67,7 +81,11 @@ describe('Worker fetch handler', () => {
     })
 
     it('routes /api/ with trailing slash to stats handler', async () => {
-      const response = await worker.fetch(createRequest('/api/?username=testuser'), env)
+      const response = await worker.fetch(
+        createRequest('/api/?username=testuser'),
+        env,
+        createCtx(),
+      )
       expect(response.status).toBe(200)
       expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
     })
@@ -76,6 +94,7 @@ describe('Worker fetch handler', () => {
       const response = await worker.fetch(
         createRequest('/api/top-langs/?username=testuser'),
         env,
+        createCtx(),
       )
       expect(response.status).toBe(200)
       expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
@@ -85,14 +104,18 @@ describe('Worker fetch handler', () => {
   describe('/api stats route', () => {
     it('renders error SVG when fetchStats rejects', async () => {
       fetchStats.mockRejectedValue(new Error('Something broke'))
-      const response = await worker.fetch(createRequest('/api?username=testuser'), env)
+      const response = await worker.fetch(createRequest('/api?username=testuser'), env, createCtx())
       expect(response.status).toBe(200)
       const body = await response.text()
       expect(body).toContain('Something went wrong')
     })
 
     it('renders error for invalid locale', async () => {
-      const response = await worker.fetch(createRequest('/api?username=test&locale=zz-ZZ'), env)
+      const response = await worker.fetch(
+        createRequest('/api?username=test&locale=zz-ZZ'),
+        env,
+        createCtx(),
+      )
       const body = await response.text()
       expect(body).toContain('Language not found')
     })
@@ -101,6 +124,7 @@ describe('Worker fetch handler', () => {
       await worker.fetch(
         createRequest('/api?username=testuser&include_all_commits=true&exclude_repo=repo1,repo2'),
         env,
+        createCtx(),
       )
       expect(fetchStats).toHaveBeenCalledWith(
         'testuser',
@@ -115,7 +139,7 @@ describe('Worker fetch handler', () => {
     })
 
     it('sets cache headers on success', async () => {
-      const response = await worker.fetch(createRequest('/api?username=testuser'), env)
+      const response = await worker.fetch(createRequest('/api?username=testuser'), env, createCtx())
       const cacheControl = response.headers.get('Cache-Control')
       expect(cacheControl).toBeTruthy()
     })
@@ -126,6 +150,7 @@ describe('Worker fetch handler', () => {
       const response = await worker.fetch(
         createRequest('/api/top-langs?username=test&layout=invalid'),
         env,
+        createCtx(),
       )
       const body = await response.text()
       expect(body).toContain('Incorrect layout input')
@@ -135,6 +160,7 @@ describe('Worker fetch handler', () => {
       const response = await worker.fetch(
         createRequest('/api/top-langs?username=test&stats_format=invalid'),
         env,
+        createCtx(),
       )
       const body = await response.text()
       expect(body).toContain('Incorrect stats_format input')
@@ -145,6 +171,7 @@ describe('Worker fetch handler', () => {
         const response = await worker.fetch(
           createRequest(`/api/top-langs?username=test&layout=${layout}`),
           env,
+          createCtx(),
         )
         const body = await response.text()
         expect(body).toContain('<svg')
@@ -155,9 +182,72 @@ describe('Worker fetch handler', () => {
       const response = await worker.fetch(
         createRequest('/api/top-langs?username=test&locale=zz-ZZ'),
         env,
+        createCtx(),
       )
       const body = await response.text()
       expect(body).toContain('Locale not found')
+    })
+  })
+
+  describe('Cache API integration', () => {
+    it('returns cached response on cache hit with X-Cache: HIT', async () => {
+      const cachedBody = '<svg>cached</svg>'
+      const cachedResponse = new Response(cachedBody, {
+        headers: { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'max-age=86400' },
+      })
+      mockCache.match.mockResolvedValue(cachedResponse)
+
+      const response = await worker.fetch(createRequest('/api?username=testuser'), env, createCtx())
+      expect(response.headers.get('X-Cache')).toBe('HIT')
+      expect(await response.text()).toBe(cachedBody)
+      expect(fetchStats).not.toHaveBeenCalled()
+    })
+
+    it('sets X-Cache: MISS on cache miss', async () => {
+      const response = await worker.fetch(createRequest('/api?username=testuser'), env, createCtx())
+      expect(response.headers.get('X-Cache')).toBe('MISS')
+    })
+
+    it('stores response in cache via ctx.waitUntil on miss', async () => {
+      const ctx = createCtx()
+      await worker.fetch(createRequest('/api?username=testuser'), env, ctx)
+      expect(ctx.waitUntil).toHaveBeenCalledTimes(1)
+      expect(mockCache.put).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not cache error responses (non-200 from route handler)', async () => {
+      const ctx = createCtx()
+      await worker.fetch(createRequest('/unknown'), env, ctx)
+      expect(mockCache.put).not.toHaveBeenCalled()
+    })
+
+    it('normalizes trailing slashes for cache key consistency', async () => {
+      const ctx = createCtx()
+      await worker.fetch(createRequest('/api/top-langs/?username=testuser'), env, ctx)
+
+      const putCall = mockCache.put.mock.calls[0]
+      const cacheKeyUrl = new URL(putCall[0].url)
+      expect(cacheKeyUrl.pathname).toBe('/api/top-langs')
+    })
+
+    it('sorts query params for cache key consistency', async () => {
+      const ctx = createCtx()
+      await worker.fetch(
+        createRequest('/api?username=testuser&theme=gotham&hide_border=false'),
+        env,
+        ctx,
+      )
+
+      const putCall = mockCache.put.mock.calls[0]
+      const cacheKeyUrl = new URL(putCall[0].url)
+      const params = [...cacheKeyUrl.searchParams.keys()]
+      const sorted = [...params].sort()
+      expect(params).toEqual(sorted)
+    })
+
+    it('skips cache for 404 routes', async () => {
+      await worker.fetch(createRequest('/nonexistent'), env, createCtx())
+      expect(mockCache.match).not.toHaveBeenCalled()
     })
   })
 })
