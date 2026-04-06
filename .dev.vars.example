@@ -1,0 +1,6 @@
+# Copy to .dev.vars and fill in your GitHub PAT(s)
+# Generate at: https://github.com/settings/tokens
+# Required scopes: read:user, repo (for private repo stats)
+
+GH_PAT_1=ghp_your_token_here
+# GH_PAT_2=ghp_optional_second_token

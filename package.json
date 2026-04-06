@@ -1,0 +1,26 @@
+{
+  "name": "github-readme-stats-worker",
+  "version": "0.1.0",
+  "description": "Self-hosted GitHub readme stats cards on Cloudflare Workers",
+  "type": "module",
+  "main": "src/worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0",
+    "vitest": "^3.0.0",
+    "@cloudflare/vitest-pool-workers": "^0.8.0"
+  },
+  "dependencies": {
+    "emoji-name-map": "^2.0.3",
+    "github-username-regex": "^1.0.0",
+    "word-wrap": "^1.2.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
