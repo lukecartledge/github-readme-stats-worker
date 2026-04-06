@@ -1,5 +1,6 @@
 import { renderRepoCard } from './cards/repo.js'
 import { renderStatsCard } from './cards/stats.js'
+import { renderStreakCard } from './cards/streak.js'
 import { renderTopLanguages } from './cards/top-languages.js'
 import { guardAccess } from './common/access.js'
 import {
@@ -13,6 +14,7 @@ import { parseArray, parseBoolean } from './common/ops.js'
 import { renderError } from './common/render.js'
 import { fetchRepo } from './fetchers/repo.js'
 import { fetchStats } from './fetchers/stats.js'
+import { fetchStreak } from './fetchers/streak.js'
 import { fetchTopLanguages } from './fetchers/top-languages.js'
 import { isLocaleAvailable } from './translations.js'
 
@@ -321,6 +323,77 @@ const handlePinRoute = async (url, env) => {
   }
 }
 
+const handleStreakRoute = async (url, env) => {
+  const params = Object.fromEntries(url.searchParams.entries())
+  const colors = getBaseColorOptions(params)
+
+  const access = guardAccess({
+    res: { send: (value) => value },
+    id: params.username,
+    type: 'username',
+    env,
+    colors,
+  })
+
+  if (!access.isPassed) {
+    return getResponse(access.result, setErrorCacheHeaders(), 200)
+  }
+
+  if (params.locale && !isLocaleAvailable(params.locale)) {
+    return getResponse(
+      renderError({
+        message: 'Something went wrong',
+        secondaryMessage: 'Locale not found',
+        renderOptions: colors,
+      }),
+      setErrorCacheHeaders(),
+      200,
+    )
+  }
+
+  try {
+    const streakData = await fetchStreak(params.username, env)
+
+    const cacheSeconds = resolveCacheSeconds({
+      requested: parseInt(params.cache_seconds, 10),
+      def: CACHE_TTL.STREAK_CARD.DEFAULT,
+      min: CACHE_TTL.STREAK_CARD.MIN,
+      max: CACHE_TTL.STREAK_CARD.MAX,
+    })
+
+    const svg = renderStreakCard(streakData, {
+      hide_border: parseBoolean(params.hide_border),
+      title_color: params.title_color,
+      text_color: params.text_color,
+      bg_color: params.bg_color,
+      border_color: params.border_color,
+      theme: params.theme,
+      border_radius: params.border_radius,
+      locale: params.locale ? params.locale.toLowerCase() : null,
+      disable_animations: parseBoolean(params.disable_animations),
+    })
+
+    return getResponse(svg, setCacheHeaders(cacheSeconds), 200)
+  } catch (err) {
+    const isError = err instanceof Error
+    const message = isError ? err.message : 'An unknown error occurred'
+    const secondaryMessage = isError ? retrieveSecondaryMessage(err) : undefined
+
+    return getResponse(
+      renderError({
+        message,
+        secondaryMessage,
+        renderOptions: {
+          ...colors,
+          show_repo_link: !(err instanceof MissingParamError),
+        },
+      }),
+      setErrorCacheHeaders(),
+      200,
+    )
+  }
+}
+
 /**
  * Builds a normalized cache key URL.
  * Strips trailing slashes and sorts query params for consistent cache hits.
@@ -335,7 +408,7 @@ const buildCacheKey = (url) => {
   return new Request(normalized.toString())
 }
 
-const CACHED_ROUTES = new Set(['/api', '/api/top-langs', '/api/pin'])
+const CACHED_ROUTES = new Set(['/api', '/api/top-langs', '/api/pin', '/api/streak'])
 
 export default {
   async fetch(request, env, ctx) {
@@ -372,6 +445,8 @@ export default {
       response = await handleTopLanguagesRoute(url, env)
     } else if (pathname === '/api/pin') {
       response = await handlePinRoute(url, env)
+    } else if (pathname === '/api/streak') {
+      response = await handleStreakRoute(url, env)
     }
 
     if (response.status === 200) {

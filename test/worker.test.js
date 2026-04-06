@@ -12,9 +12,14 @@ vi.mock('../src/fetchers/repo.js', () => ({
   fetchRepo: vi.fn(),
 }))
 
+vi.mock('../src/fetchers/streak.js', () => ({
+  fetchStreak: vi.fn(),
+}))
+
 const { fetchStats } = await import('../src/fetchers/stats.js')
 const { fetchTopLanguages } = await import('../src/fetchers/top-languages.js')
 const { fetchRepo } = await import('../src/fetchers/repo.js')
+const { fetchStreak } = await import('../src/fetchers/streak.js')
 const worker = (await import('../src/worker.js')).default
 
 const mockStats = {
@@ -48,6 +53,13 @@ const mockRepoData = {
   forkCount: 10,
 }
 
+const mockStreakData = {
+  totalContributions: 1234,
+  firstContribution: '2020-01-15',
+  longestStreak: { start: '2024-03-01', end: '2024-04-15', length: 46 },
+  currentStreak: { start: '2026-03-20', end: '2026-04-06', length: 18 },
+}
+
 const createRequest = (path) => new Request(`https://stats.example.com${path}`)
 
 const createCtx = () => ({ waitUntil: vi.fn() })
@@ -65,6 +77,7 @@ describe('Worker fetch handler', () => {
     fetchStats.mockResolvedValue(mockStats)
     fetchTopLanguages.mockResolvedValue(mockTopLangs)
     fetchRepo.mockResolvedValue(mockRepoData)
+    fetchStreak.mockResolvedValue(mockStreakData)
     mockCache.match.mockResolvedValue(undefined)
     mockCache.put.mockResolvedValue(undefined)
     globalThis.caches = { default: mockCache }
@@ -273,6 +286,74 @@ describe('Worker fetch handler', () => {
     it('caches pin route responses', async () => {
       const ctx = createCtx()
       await worker.fetch(createRequest('/api/pin?username=testuser&repo=test-repo'), env, ctx)
+      expect(ctx.waitUntil).toHaveBeenCalledTimes(1)
+      expect(mockCache.put).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('/api/streak route', () => {
+    it('routes /api/streak to streak handler', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/streak?username=testuser'),
+        env,
+        createCtx(),
+      )
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+      const body = await response.text()
+      expect(body).toContain('<svg')
+    })
+
+    it('routes /api/streak/ with trailing slash', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/streak/?username=testuser'),
+        env,
+        createCtx(),
+      )
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+    })
+
+    it('renders error SVG when fetchStreak rejects', async () => {
+      fetchStreak.mockRejectedValue(new Error('GitHub API down'))
+      const response = await worker.fetch(
+        createRequest('/api/streak?username=testuser'),
+        env,
+        createCtx(),
+      )
+      expect(response.status).toBe(200)
+      const body = await response.text()
+      expect(body).toContain('Something went wrong')
+    })
+
+    it('renders error for invalid locale', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/streak?username=test&locale=zz-ZZ'),
+        env,
+        createCtx(),
+      )
+      const body = await response.text()
+      expect(body).toContain('Locale not found')
+    })
+
+    it('passes username to fetchStreak', async () => {
+      await worker.fetch(createRequest('/api/streak?username=testuser'), env, createCtx())
+      expect(fetchStreak).toHaveBeenCalledWith('testuser', env)
+    })
+
+    it('sets cache headers on success', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/streak?username=testuser'),
+        env,
+        createCtx(),
+      )
+      const cacheControl = response.headers.get('Cache-Control')
+      expect(cacheControl).toBeTruthy()
+    })
+
+    it('caches streak route responses', async () => {
+      const ctx = createCtx()
+      await worker.fetch(createRequest('/api/streak?username=testuser'), env, ctx)
       expect(ctx.waitUntil).toHaveBeenCalledTimes(1)
       expect(mockCache.put).toHaveBeenCalledTimes(1)
     })
