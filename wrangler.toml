@@ -15,6 +15,11 @@ CACHE_MAX_AGE = "1800"
 #   wrangler secret put GH_PAT_1
 #   wrangler secret put GH_PAT_2
 
+# Analytics Engine for request logging
+[[analytics_engine_datasets]]
+binding = "ANALYTICS"
+dataset = "github_readme_stats"
+
 # KV namespace for cross-datacenter caching
 # Create via: wrangler kv namespace create SVG_CACHE
 # Then paste the id below and uncomment
