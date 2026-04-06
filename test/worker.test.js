@@ -65,6 +65,21 @@ describe('Worker fetch handler', () => {
       const body = await response.text()
       expect(body).toContain('<svg')
     })
+
+    it('routes /api/ with trailing slash to stats handler', async () => {
+      const response = await worker.fetch(createRequest('/api/?username=testuser'), env)
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+    })
+
+    it('routes /api/top-langs/ with trailing slash to top languages handler', async () => {
+      const response = await worker.fetch(
+        createRequest('/api/top-langs/?username=testuser'),
+        env,
+      )
+      expect(response.status).toBe(200)
+      expect(response.headers.get('Content-Type')).toBe('image/svg+xml')
+    })
   })
 
   describe('/api stats route', () => {

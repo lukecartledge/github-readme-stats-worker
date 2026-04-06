@@ -249,12 +249,13 @@ const handleTopLanguagesRoute = async (url, env) => {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
+    const pathname = url.pathname.replace(/\/+$/, '') || '/'
 
-    if (url.pathname === '/api') {
+    if (pathname === '/api') {
       return handleStatsRoute(url, env)
     }
 
-    if (url.pathname === '/api/top-langs') {
+    if (pathname === '/api/top-langs') {
       return handleTopLanguagesRoute(url, env)
     }
 
