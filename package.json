@@ -11,9 +11,9 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "wrangler": "^4.0.0",
+    "@cloudflare/vitest-pool-workers": "^0.8.0",
     "vitest": "^3.0.0",
-    "@cloudflare/vitest-pool-workers": "^0.8.0"
+    "wrangler": "^4.80.0"
   },
   "dependencies": {
     "emoji-name-map": "^2.0.3",
