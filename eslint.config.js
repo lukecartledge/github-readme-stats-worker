@@ -38,6 +38,7 @@ export default [
       ...typescriptEslint.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       'no-unused-vars': 'off',
+      'no-undef': 'off', // TypeScript handles this via tsc
     },
   },
   {

@@ -47,8 +47,8 @@ function calculateRank({
   prs,
   issues,
   reviews,
-  // eslint-disable-next-line no-unused-vars
-  repos, // unused
+
+  repos: _repos,
   stars,
   followers,
 }: RankParams): RankResult {

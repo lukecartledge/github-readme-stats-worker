@@ -144,8 +144,7 @@ const getProgressAnimation = ({ progress }: { progress: number }): string => {
  * Retrieves CSS styles for a card.
  */
 const getStyles = ({
-  // eslint-disable-next-line no-unused-vars
-  titleColor,
+  titleColor: _titleColor,
   textColor,
   iconColor,
   ringColor,
