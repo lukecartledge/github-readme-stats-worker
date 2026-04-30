@@ -122,6 +122,7 @@ const setErrorCacheHeaders = () => {
       `max-age=${CACHE_TTL.ERROR}, ` +
       `s-maxage=${CACHE_TTL.ERROR}, ` +
       `stale-while-revalidate=${DURATIONS.ONE_DAY}`,
+    'X-Card-Error': '1',
   }
 }
 

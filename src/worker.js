@@ -5,6 +5,7 @@ import { renderTopLanguages } from './cards/top-languages.js'
 import { guardAccess } from './common/access.js'
 import {
   CACHE_TTL,
+  DURATIONS,
   resolveCacheSeconds,
   setCacheHeaders,
   setErrorCacheHeaders,
@@ -408,6 +409,13 @@ const buildCacheKey = (url) => {
   return new Request(normalized.toString())
 }
 
+const buildKvKey = (url) => {
+  const normalized = new URL(url.toString())
+  normalized.pathname = normalized.pathname.replace(/\/+$/, '') || '/'
+  normalized.searchParams.sort()
+  return normalized.pathname + normalized.search
+}
+
 const CACHED_ROUTES = new Set(['/api', '/api/top-langs', '/api/pin', '/api/streak'])
 
 const writeAnalytics = (env, { route, username, theme, cacheStatus, responseTime }) => {
@@ -467,17 +475,40 @@ export default {
       response = await handleStreakRoute(url, env)
     }
 
-    if (response.status === 200) {
-      const cloned = response.clone()
+    const isError = response.headers.get('X-Card-Error') === '1'
+    const kvKey = buildKvKey(url)
+
+    if (!isError) {
       response.headers.set('X-Cache', 'MISS')
-      ctx.waitUntil(cache.put(cacheKey, cloned))
+      const svgBody = await response.clone().text()
+      ctx.waitUntil(
+        Promise.all([
+          cache.put(cacheKey, response.clone()),
+          env.SVG_CACHE
+            ? env.SVG_CACHE.put(kvKey, svgBody, { expirationTtl: 30 * 24 * 60 * 60 })
+            : Promise.resolve(),
+        ]),
+      )
+    } else if (env.SVG_CACHE) {
+      const stale = await env.SVG_CACHE.get(kvKey)
+      if (stale) {
+        response = getResponse(stale, setCacheHeaders(DURATIONS.TWO_HOURS), 200)
+        response.headers.set('X-Cache', 'STALE')
+        ctx.waitUntil(cache.put(cacheKey, response.clone()))
+      } else {
+        response.headers.set('X-Cache', 'MISS')
+        ctx.waitUntil(cache.put(cacheKey, response.clone()))
+      }
+    } else {
+      response.headers.set('X-Cache', 'MISS')
+      ctx.waitUntil(cache.put(cacheKey, response.clone()))
     }
 
     writeAnalytics(env, {
       route: pathname,
       username: params.username,
       theme: params.theme,
-      cacheStatus: 'MISS',
+      cacheStatus: response.headers.get('X-Cache'),
       responseTime: Date.now() - startTime,
     })
 
