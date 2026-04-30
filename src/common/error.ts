@@ -1,0 +1,61 @@
+/** A general message to ask user to try again later. */
+const TRY_AGAIN_LATER = 'Please try again later'
+
+/** A map of error types to secondary error messages. */
+const SECONDARY_ERROR_MESSAGES: Record<string, string> = {
+  MAX_RETRY: 'You can deploy own instance or wait until public will be no longer limited',
+  NO_TOKENS: 'Please add an env variable called GH_PAT_1 with your GitHub API token',
+  USER_NOT_FOUND: 'Make sure the provided username is not an organization',
+  GRAPHQL_ERROR: TRY_AGAIN_LATER,
+  GITHUB_REST_API_ERROR: TRY_AGAIN_LATER,
+  WAKATIME_USER_NOT_FOUND: 'Make sure you have a public WakaTime profile',
+}
+
+/** Custom error class to handle custom GRS errors. */
+class CustomError extends Error {
+  type: string
+  secondaryMessage: string
+
+  constructor(message: string, type: string) {
+    super(message)
+    this.type = type
+    this.secondaryMessage = SECONDARY_ERROR_MESSAGES[type] || type
+  }
+
+  static MAX_RETRY = 'MAX_RETRY'
+  static NO_TOKENS = 'NO_TOKENS'
+  static USER_NOT_FOUND = 'USER_NOT_FOUND'
+  static GRAPHQL_ERROR = 'GRAPHQL_ERROR'
+  static GITHUB_REST_API_ERROR = 'GITHUB_REST_API_ERROR'
+  static WAKATIME_ERROR = 'WAKATIME_ERROR'
+}
+
+/** Missing query parameter class. */
+class MissingParamError extends Error {
+  missedParams: string[]
+  secondaryMessage: string | undefined
+
+  constructor(missedParams: string[], secondaryMessage?: string) {
+    const msg = `Missing params ${missedParams
+      .map((p) => `"${p}"`)
+      .join(', ')} make sure you pass the parameters in URL`
+    super(msg)
+    this.missedParams = missedParams
+    this.secondaryMessage = secondaryMessage
+  }
+}
+
+/** Retrieve secondary message from an error object. */
+const retrieveSecondaryMessage = (err: Error): string | undefined => {
+  return 'secondaryMessage' in err && typeof err.secondaryMessage === 'string'
+    ? err.secondaryMessage
+    : undefined
+}
+
+export {
+  CustomError,
+  MissingParamError,
+  SECONDARY_ERROR_MESSAGES,
+  TRY_AGAIN_LATER,
+  retrieveSecondaryMessage,
+}
