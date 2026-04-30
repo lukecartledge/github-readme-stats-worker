@@ -20,9 +20,7 @@ CACHE_MAX_AGE = "1800"
 binding = "ANALYTICS"
 dataset = "github_readme_stats"
 
-# KV namespace for cross-datacenter caching
-# Create via: wrangler kv namespace create SVG_CACHE
-# Then paste the id below and uncomment
-# [[kv_namespaces]]
-# binding = "SVG_CACHE"
-# id = ""
+# KV namespace for cross-datacenter caching (stale-if-error fallback)
+[[kv_namespaces]]
+binding = "SVG_CACHE"
+id = "699e00110ab04c8b881692b7c243479b"
