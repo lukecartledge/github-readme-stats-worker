@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
 import { fetchTopLanguages } from '../../src/fetchers/top-languages.js'
 
 vi.mock('../../src/common/retryer.js', () => ({
@@ -11,9 +11,10 @@ vi.mock('../../src/common/log.js', () => ({
   default: { log: vi.fn(), error: vi.fn() },
 }))
 
-const { retryer } = await import('../../src/common/retryer.js')
+const { retryer: _retryer } = await import('../../src/common/retryer.js')
+const retryer = _retryer as unknown as Mock
 
-const mockLangResponse = (repos = []) => ({
+const mockLangResponse = (repos: unknown[] = []) => ({
   data: {
     data: {
       user: {
@@ -25,10 +26,10 @@ const mockLangResponse = (repos = []) => ({
   },
 })
 
-const makeRepo = (name, languages) => ({
+const makeRepo = (name: string, languages: [string, number, string?][]) => ({
   name,
   languages: {
-    edges: languages.map(([langName, size, color]) => ({
+    edges: languages.map(([langName, size, color]: [string, number, string?]) => ({
       size,
       node: { name: langName, color: color || '#000' },
     })),

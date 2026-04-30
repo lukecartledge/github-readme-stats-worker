@@ -1,13 +1,16 @@
 import { describe, it, expect } from 'vitest'
 import { renderRepoCard } from '../../src/cards/repo.js'
+import type { RepositoryData } from '../../src/fetchers/types.js'
 
-const mockRepo = {
+const mockRepo: RepositoryData = {
   name: 'test-repo',
   nameWithOwner: 'testuser/test-repo',
   description: 'A cool test repository for testing',
   primaryLanguage: { color: '#f1e05a', id: 'lang1', name: 'JavaScript' },
   isArchived: false,
   isTemplate: false,
+  isPrivate: false,
+  stargazers: { totalCount: 42 },
   starCount: 42,
   forkCount: 10,
 }
@@ -35,7 +38,7 @@ describe('renderRepoCard', () => {
   })
 
   it('displays default description when none provided', () => {
-    const svg = renderRepoCard({ ...mockRepo, description: null })
+    const svg = renderRepoCard({ ...mockRepo, description: null as unknown as string })
     expect(svg).toContain('No description provided')
   })
 

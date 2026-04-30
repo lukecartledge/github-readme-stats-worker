@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { fetchStats } from '../../src/fetchers/stats.js'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
+import { fetchStats as _fetchStats } from '../../src/fetchers/stats.js'
+const fetchStats = _fetchStats as (...args: unknown[]) => Promise<unknown>
 
 vi.mock('../../src/common/retryer.js', () => ({
   retryer: vi.fn(),
@@ -11,7 +12,8 @@ vi.mock('../../src/common/log.js', () => ({
   default: { log: vi.fn(), error: vi.fn() },
 }))
 
-const { retryer } = await import('../../src/common/retryer.js')
+const { retryer: _retryer } = await import('../../src/common/retryer.js')
+const retryer = _retryer as unknown as Mock
 
 const mockUserResponse = (overrides = {}) => ({
   data: {
@@ -56,7 +58,7 @@ describe('fetchStats', () => {
     retryer.mockResolvedValue(mockUserResponse())
     const env = { GH_PAT_1: 'token' }
 
-    const stats = await fetchStats('testuser', false, [], false, false, false, undefined, env)
+    const stats = await fetchStats('testuser', false, [], false, false, false, undefined, env) as Record<string, unknown>
 
     expect(stats).toHaveProperty('name', 'Test User')
     expect(stats).toHaveProperty('totalPRs', 100)
@@ -71,14 +73,14 @@ describe('fetchStats', () => {
 
   it('uses login as name when name is null', async () => {
     retryer.mockResolvedValue(mockUserResponse({ name: null }))
-    const stats = await fetchStats('testuser')
+    const stats = await fetchStats('testuser') as Record<string, unknown>
     expect(stats.name).toBe('testuser')
   })
 
   it('excludes specified repositories from star count', async () => {
     retryer.mockResolvedValue(mockUserResponse())
 
-    const stats = await fetchStats('testuser', false, ['repo1'])
+    const stats = await fetchStats('testuser', false, ['repo1']) as Record<string, unknown>
     expect(stats.totalStars).toBe(50)
   })
 
@@ -115,7 +117,7 @@ describe('fetchStats', () => {
   it('calculates merged PRs percentage when included', async () => {
     retryer.mockResolvedValue(mockUserResponse())
 
-    const stats = await fetchStats('testuser', false, [], true, false, false, undefined, {})
+    const stats = await fetchStats('testuser', false, [], true, false, false, undefined, {}) as Record<string, unknown>
 
     expect(stats.totalPRsMerged).toBe(80)
     expect(stats.mergedPRsPercentage).toBe(80)
@@ -124,7 +126,7 @@ describe('fetchStats', () => {
   it('includes discussions counts when enabled', async () => {
     retryer.mockResolvedValue(mockUserResponse())
 
-    const stats = await fetchStats('testuser', false, [], false, true, true, undefined, {})
+    const stats = await fetchStats('testuser', false, [], false, true, true, undefined, {}) as Record<string, unknown>
 
     expect(stats.totalDiscussionsStarted).toBe(5)
     expect(stats.totalDiscussionsAnswered).toBe(3)

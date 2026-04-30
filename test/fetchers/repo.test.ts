@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
 import { fetchRepo } from '../../src/fetchers/repo.js'
 
 vi.mock('../../src/common/retryer.js', () => ({
@@ -6,7 +6,8 @@ vi.mock('../../src/common/retryer.js', () => ({
   RETRIES: 0,
 }))
 
-const { retryer } = await import('../../src/common/retryer.js')
+const { retryer: _retryer } = await import('../../src/common/retryer.js')
+const retryer = _retryer as unknown as Mock
 
 const mockRepoData = {
   name: 'test-repo',
@@ -70,7 +71,7 @@ describe('fetchRepo', () => {
     expect(repo.starCount).toBe(42)
     expect(repo.forkCount).toBe(10)
     expect(repo.description).toBe('A test repository')
-    expect(repo.primaryLanguage.name).toBe('JavaScript')
+    expect(repo.primaryLanguage!.name).toBe('JavaScript')
   })
 
   it('returns repo data for organization repository', async () => {

@@ -81,6 +81,6 @@ describe('renderStreakCard', () => {
   })
 
   it('throws a render error for invalid data input', () => {
-    expect(() => renderStreakCard(null)).toThrow('Could not render streak card.')
+    expect(() => renderStreakCard(null as unknown as Parameters<typeof renderStreakCard>[0])).toThrow('Could not render streak card.')
   })
 })

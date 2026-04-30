@@ -78,6 +78,6 @@ describe('retrieveSecondaryMessage', () => {
   })
 
   it('returns undefined for non-Error objects', () => {
-    expect(retrieveSecondaryMessage({})).toBeUndefined()
+    expect(retrieveSecondaryMessage({} as unknown as Error)).toBeUndefined()
   })
 })

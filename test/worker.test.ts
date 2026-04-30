@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest'
 
 vi.mock('../src/fetchers/stats.js', () => ({
   fetchStats: vi.fn(),
@@ -16,10 +16,14 @@ vi.mock('../src/fetchers/streak.js', () => ({
   fetchStreak: vi.fn(),
 }))
 
-const { fetchStats } = await import('../src/fetchers/stats.js')
-const { fetchTopLanguages } = await import('../src/fetchers/top-languages.js')
-const { fetchRepo } = await import('../src/fetchers/repo.js')
-const { fetchStreak } = await import('../src/fetchers/streak.js')
+const { fetchStats: _fetchStats } = await import('../src/fetchers/stats.js')
+const fetchStats = _fetchStats as unknown as Mock
+const { fetchTopLanguages: _fetchTopLanguages } = await import('../src/fetchers/top-languages.js')
+const fetchTopLanguages = _fetchTopLanguages as unknown as Mock
+const { fetchRepo: _fetchRepo } = await import('../src/fetchers/repo.js')
+const fetchRepo = _fetchRepo as unknown as Mock
+const { fetchStreak: _fetchStreak } = await import('../src/fetchers/streak.js')
+const fetchStreak = _fetchStreak as unknown as Mock
 const worker = (await import('../src/worker.js')).default
 
 const mockStats = {
@@ -60,9 +64,9 @@ const mockStreakData = {
   currentStreak: { start: '2026-03-20', end: '2026-04-06', length: 18 },
 }
 
-const createRequest = (path) => new Request(`https://stats.example.com${path}`)
+const createRequest = (path: string) => new Request(`https://stats.example.com${path}`)
 
-const createCtx = () => ({ waitUntil: vi.fn() })
+const createCtx = () => ({ waitUntil: vi.fn() }) as unknown as ExecutionContext
 
 const mockAnalytics = {
   writeDataPoint: vi.fn(),
@@ -85,7 +89,7 @@ describe('Worker fetch handler', () => {
     mockCache.match.mockResolvedValue(undefined)
     mockCache.put.mockResolvedValue(undefined)
     mockAnalytics.writeDataPoint.mockClear()
-    globalThis.caches = { default: mockCache }
+    globalThis.caches = { default: mockCache } as unknown as CacheStorage
   })
 
   describe('routing', () => {
@@ -369,7 +373,7 @@ describe('Worker fetch handler', () => {
       const response = await worker.fetch(createRequest('/health'), env, createCtx())
       expect(response.status).toBe(200)
       expect(response.headers.get('Content-Type')).toBe('application/json')
-      const body = await response.json()
+      const body = await response.json() as Record<string, unknown>
       expect(body.status).toBe('ok')
       expect(body.timestamp).toBeTypeOf('number')
     })
@@ -382,7 +386,7 @@ describe('Worker fetch handler', () => {
     it('returns health response with trailing slash', async () => {
       const response = await worker.fetch(createRequest('/health/'), env, createCtx())
       expect(response.status).toBe(200)
-      const body = await response.json()
+      const body = await response.json() as Record<string, unknown>
       expect(body.status).toBe('ok')
     })
   })

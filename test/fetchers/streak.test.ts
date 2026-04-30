@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 
 import { fetchStreak } from '../../src/fetchers/streak.js'
 
@@ -11,10 +11,12 @@ vi.mock('../../src/common/retryer.js', () => ({
   RETRIES: 0,
 }))
 
-const { request } = await import('../../src/common/http.js')
-const { retryer } = await import('../../src/common/retryer.js')
+const { request: _request } = await import('../../src/common/http.js')
+const request = _request as unknown as Mock
+const { retryer: _retryer } = await import('../../src/common/retryer.js')
+const retryer = _retryer as unknown as Mock
 
-const makeMetadataResponse = (years, createdAt = '2021-01-01T00:00:00Z') => ({
+const makeMetadataResponse = (years: number[], createdAt = '2021-01-01T00:00:00Z') => ({
   data: {
     data: {
       user: {
@@ -27,7 +29,7 @@ const makeMetadataResponse = (years, createdAt = '2021-01-01T00:00:00Z') => ({
   },
 })
 
-const makeYearResponse = (days) => ({
+const makeYearResponse = (days: [string, number][]) => ({
   data: {
     data: {
       user: {
@@ -35,7 +37,7 @@ const makeYearResponse = (days) => ({
           contributionCalendar: {
             weeks: [
               {
-                contributionDays: days.map(([date, contributionCount]) => ({
+                contributionDays: days.map(([date, contributionCount]: [string, number]) => ({
                   date,
                   contributionCount,
                 })),

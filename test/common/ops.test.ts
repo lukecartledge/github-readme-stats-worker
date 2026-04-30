@@ -30,8 +30,8 @@ describe('parseBoolean', () => {
   })
 
   it('returns undefined for non-boolean non-string values', () => {
-    expect(parseBoolean(undefined)).toBeUndefined()
-    expect(parseBoolean(null)).toBeUndefined()
+    expect(parseBoolean(undefined as unknown as string)).toBeUndefined()
+    expect(parseBoolean(null as unknown as string)).toBeUndefined()
   })
 })
 
@@ -42,8 +42,8 @@ describe('parseArray', () => {
 
   it('returns empty array for falsy input', () => {
     expect(parseArray('')).toEqual([])
-    expect(parseArray(undefined)).toEqual([])
-    expect(parseArray(null)).toEqual([])
+    expect(parseArray(undefined as unknown as string)).toEqual([])
+    expect(parseArray(null as unknown as string)).toEqual([])
   })
 
   it('returns single-element array for non-comma string', () => {

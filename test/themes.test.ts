@@ -30,7 +30,7 @@ describe('themes', () => {
     const colorKeys = ['title_color', 'icon_color', 'text_color', 'bg_color']
     for (const [name, theme] of Object.entries(themes)) {
       for (const key of colorKeys) {
-        const value = theme[key]
+        const value = (theme as Record<string, unknown>)[key] as string
         expect(typeof value, `theme "${name}".${key}`).toBe('string')
         expect(value.length, `theme "${name}".${key} is empty`).toBeGreaterThan(0)
       }

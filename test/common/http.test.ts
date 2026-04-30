@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest'
 import { request } from '../../src/common/http.js'
 
 describe('request', () => {
-  let originalFetch
+  let originalFetch: typeof globalThis.fetch
 
   beforeEach(() => {
     originalFetch = globalThis.fetch
@@ -73,7 +73,7 @@ describe('request', () => {
 
     await request({}, {})
 
-    const callArgs = globalThis.fetch.mock.calls[0]
+    const callArgs = (globalThis.fetch as unknown as Mock).mock.calls[0]
     expect(callArgs[1].headers['User-Agent']).toBe('github-readme-stats-worker')
   })
 
@@ -88,7 +88,7 @@ describe('request', () => {
     const data = { query: '{ viewer { login } }', variables: { user: 'test' } }
     await request(data, {})
 
-    const callArgs = globalThis.fetch.mock.calls[0]
+    const callArgs = (globalThis.fetch as unknown as Mock).mock.calls[0]
     expect(callArgs[1].body).toBe(JSON.stringify(data))
   })
 })
