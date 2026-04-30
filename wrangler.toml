@@ -1,5 +1,5 @@
 name = "github-readme-stats"
-main = "src/worker.js"
+main = "src/worker.ts"
 compatibility_date = "2026-04-06"
 compatibility_flags = ["nodejs_compat"]
 
