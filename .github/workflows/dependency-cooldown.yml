@@ -16,12 +16,12 @@ jobs:
       - name: Fetch Dependabot metadata
         id: dependabot-metadata
         if: github.event_name == 'pull_request' && github.actor == 'dependabot[bot]'
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Evaluate cooldown
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           ALERT_STATE: ${{ steps.dependabot-metadata.outputs.alert-state }}
         with:
